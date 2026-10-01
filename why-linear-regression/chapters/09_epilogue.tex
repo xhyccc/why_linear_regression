@@ -5,33 +5,35 @@ Gather the eight threads.
 
 \begin{figure}[htbp]
   \centering
+  \resizebox{\textwidth}{!}{%
   \begin{tikzpicture}[
       font=\small,
       box/.style={draw=blue!50!black, fill=blue!5, rounded corners=2pt,
-                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+                  align=center, inner sep=6pt, text width=4.6cm},
       kern/.style={draw=green!45!black, fill=green!6, rounded corners=2pt,
-                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+                  align=center, inner sep=6pt, text width=4.6cm},
       net/.style={draw=red!55!black, fill=red!5, rounded corners=2pt,
-                  align=center, inner sep=5pt, text width=3.9cm, minimum height=1.35cm},
+                  align=center, inner sep=6pt, text width=4.6cm},
       arr/.style={->, >=Stealth, thick, gray!50!black},
       lab/.style={midway, font=\scriptsize, fill=white, inner sep=1.5pt}]
     \node[box] (onedim) at (0,0) {One dimension: slope $=$ correlation\\correlation vs.\ causation\\(Ch.~2)};
-    \node[box] (highdim) at (5.1,0) {Closed form in high dimensions\\$\bhat=(\X^\top\X)^{-1}\X^\top\y$\\(Ch.~3)};
-    \node[box] (gd) at (10.2,0) {Iterative view: GD\\spectral filtering, fixed points\\(Ch.~4)};
-    \node[box] (under) at (10.2,-2.7) {Underdetermined: min-norm\\$\widehat{\bbeta}'=\X^\top(\X\X^\top)^{-1}\y$\\implicit regularization (Ch.~5)};
-    \node[box] (inf) at (5.1,-2.7) {Inference: precision matrix\\conditional-independence tests\\(Ch.~6)};
-    \node[box] (fdr) at (5.1,-5.3) {Inference at scale: FDR\\BH and knockoffs\\(Ch.~7)};
-    \node[kern] (kernel) at (0,-2.7) {Kernels: $\x=\phi(z)$\\kernel $=$ inner-product interface\\(Ch.~8)};
-    \node[net] (ntk) at (0,-5.3) {Deep networks: random features\\ridgeless regression and NTK\\(Sec.~8.5)};
-    \draw[arr] (onedim) -- (highdim) node[lab]{generalize};
-    \draw[arr] (highdim) -- (gd) node[lab]{inversion $=$ iteration};
-    \draw[arr] (gd) -- (under) node[lab, right=2pt]{$d>n$};
-    \draw[arr] (under) -- (inf) node[lab]{};
-    \draw[arr] (inf) -- (kernel) node[lab]{};
-    \draw[arr] (inf) -- (fdr) node[lab, right=2pt]{multiple testing};
-    \draw[arr] (onedim) -- (kernel) node[lab, left=2pt]{feature map};
-    \draw[arr] (kernel) -- (ntk) node[lab, left=2pt]{wide limit};
-  \end{tikzpicture}
+    \node[box] (highdim) at (6.3,0) {Closed form in high dimensions\\$\bhat=(\X^\top\X)^{-1}\X^\top\y$\\(Ch.~3)};
+    \node[box] (gd) at (12.6,0) {Iterative view: GD\\spectral filtering, fixed points\\(Ch.~4)};
+    \node[box] (under) at (12.6,-3.4) {Underdetermined: min-norm\\$\widehat{\bbeta}'=\X^\top(\X\X^\top)^{-1}\y$\\implicit regularization (Ch.~5)};
+    \node[box] (inf) at (6.3,-3.4) {Inference: precision matrix\\conditional-independence tests\\(Ch.~6)};
+    \node[box] (fdr) at (6.3,-6.8) {Inference at scale: FDR\\BH and knockoffs\\(Ch.~7)};
+    \node[kern] (kernel) at (0,-3.4) {Kernels: $\x=\phi(z)$\\kernel $=$ inner-product interface\\(Ch.~8)};
+    \node[net] (ntk) at (0,-6.8) {Deep networks: random features\\ridgeless regression and NTK\\(Sec.~8.5)};
+    \draw[arr] (onedim) -- (highdim) node[lab, above=1.5pt]{generalize};
+    \draw[arr] (highdim) -- (gd) node[lab, above=0.5pt, align=center]{inversion $=$\\iteration};
+    \draw[arr] (gd) -- (under) node[lab, right=1pt]{$d>n$};
+    \draw[arr] (under) -- (inf);
+    \draw[arr] (inf) -- (kernel);
+    \draw[arr] (inf) -- (fdr) node[lab, right=1pt]{multiple testing};
+    \draw[arr] (onedim) -- (kernel) node[lab, left=1pt]{feature map};
+    \draw[arr] (kernel) -- (ntk) node[lab, left=1pt]{wide limit};
+  \end{tikzpicture}%
+  }
   \caption{The roadmap of this book: starting from one straight line, proceeding along the two routes of closed form and iteration, converging in the underdetermined case to minimum-norm interpolation, upgrading through the precision matrix into per-coefficient inference, then through multiple testing into inference at scale (how much of a page of conclusions can be trusted), then kernelizing through the feature map, and finally bridging to the wide limit of deep networks.}
   \label{fig:ch8-roadmap}
 \end{figure}
