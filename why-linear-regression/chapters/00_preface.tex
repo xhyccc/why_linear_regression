@@ -1,0 +1,32 @@
+% Preface
+\section*{Preface}\label{sec:preface}
+\addcontentsline{toc}{section}{Preface}
+
+\subsection*{Who this book is for}
+
+This tutorial is written for \textbf{applied scientists and data scientists} with some mathematical background --- you have taken linear algebra and calculus, you use \texttt{lm()}, \texttt{LinearRegression()}\allowbreak, or \texttt{np.linalg.lstsq} on a daily basis, and yet you feel a thin pane of glass between ``knowing how to use'' and ``understanding'': why is the slope exactly the correlation coefficient? Why squared loss rather than absolute value? How does a model with zero training error in the $d > n$ regime manage to generalize at all? What exactly is the relationship between kernel methods and my linear regression?
+
+If these questions sound familiar, this book is for you. It does not teach you how to call packages (that is what documentation is for); it derives every formula from scratch and hands you the \textbf{assumption list} behind every theorem --- because in statistics the assumptions are the substance, and the formulas are merely their shadow. The only prerequisites are undergraduate calculus and linear algebra plus basic probability; every claim can be verified by hand, and complete solutions to all exercises are collected in the appendix.
+
+\subsection*{Origins and influences}
+
+This book was written \textbf{on a whim} --- one evening, the author decided to write down, in one sitting, the ``why do we even learn linear regression'' argument that had been circulating in his head for years, and ended up going chapter by chapter all the way to Chapter~8. But the whim stands on the accumulated influence of a body of work read over a long time. The seven scholars who influenced it most are: \textbf{Francis Bach} (Inria), whose textbook \emph{Learning Theory from First Principles} (2024)\cite{bach2024} shares this book's temperament of earning every result from first principles --- the kernel-methods perspective of Chapter~\ref{sec:kernel} and the optimization--statistics interlocking of Chapters~\ref{sec:gd}--\ref{sec:gd-underdet} both bear its mark; \textbf{Ryan Tibshirani} (Stanford University), who turned generalized lasso, trend filtering, and conformal prediction into methodology that is both computable and auditable --- precisely the spirit of the estimate-to-inference route in Chapter~\ref{sec:ggm}; \textbf{Jingfeng Wu} (UC Berkeley, Simons Institute), whose work showing that ``gradient descent dominates ridge regression''\cite{wu2025} is the statistical frontier of the iteration-as-regularization story in Chapters~\ref{sec:gd}--\ref{sec:implicit}; \textbf{Arthur Jacot} (NYU Courant Institute), whose neural tangent kernel\cite{jacot2018} welded ``linear regression $\to$ kernel regression $\to$ deep networks'' into a single road --- the content of Section~\ref{sec:ntk}; \textbf{Jianqing Fan} (Princeton University), whose high-dimensional statistical framework\cite{fan2020} --- sparse estimation, variable screening, large covariance matrices --- is the source of the from-estimation-to-inference roadmap of Chapter~\ref{sec:ggm}; \textbf{David Donoho} (Stanford University), founder of compressed sensing, who proved that $\ell_1$ minimization exploits sparsity optimally and that underdetermined systems become solvable under sparsity assumptions\cite{donoho2006} --- Section~\ref{sec:sparsity}'s ``sparsity is a computable assumption'' is the statistical expression of exactly this idea; \textbf{Emmanuel Cand\`es} (Stanford University), who co-created the exact-recovery theory of compressed sensing with Donoho and Tao, and who, through the knockoffs framework, gave complex-model variable selection reproducible false discovery rate (FDR) control\cite{barber2015} --- the modern next station after Section~\ref{sec:debiased}'s ``from point estimates to testable inference.''
+
+\subsection*{How it was written, and an honest disclaimer}
+
+\textbf{This book was written with substantial AI assistance.} Specifically, the text was produced by Moonshot AI's Kimi K2.8 model running in the \textbf{Kimi Work desktop} agent mode --- it wrote the LaTeX source directly, compiled the PDF, rendered and inspected pages, and proofread chapter by chapter; the human expert (Haoyi Xiong) supplied the outline, the chapter content, and his own thinking --- in particular his multi-year understanding of linear regression and the specific points he had personally worked on (such as the exact solution of gradient descent in the underdetermined case, the kernel-methods view under latent projections, and the precision-matrix--conditional-independence connection). One sentence of division of labor: \textit{the human decides ``what to ask'' and ``what to believe''; the machine does the ``writing'' and the ``checking.''}
+
+Readers should therefore keep three things in mind:
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{The field of linear regression is vast}, and this book does not and cannot cover it all: generalized linear models, robust regression, mixed-effects models, time series, the Bayesian route, online learning, federated settings --- each deserves its own deep-dive. This book covers only the main line that the authors consider impossible to skip honestly.
+  \item \textbf{The theory here does not aim for professional rigor.} Every formula is correct and derivable, but the proofs are plainly not textbook-complete (regularity conditions for asymptotic results are uniformly omitted). \textit{Readers who work on theory should skip this book}; beginners or those who have never seen the material systematically may read it as a popularization with derivations.
+  \item \textbf{The historical and bibliographic sections were checked with care} (principal figures, years, and sources were verified online and marked in the bibliography), but if any error remains, the responsibility lies with the human authors, and corrections are welcome.
+\end{enumerate}
+
+Fit the straight line first, audit the assumptions, disclose the weaknesses honestly --- this book applies its own recipe to itself.
+
+\vspace{1em}
+\hfill Haoyi Xiong (熊昊一), in Beijing
+
+\hfill Lingkai Kong (孔令凯), in Seattle

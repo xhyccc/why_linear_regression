@@ -1,65 +1,66 @@
 % Chapter 1
-\section{Introduction: The Most Important Model You Will Ever Learn}\label{sec:intro}
+\section[Introduction: the honest starting point]{Introduction: Why the Straight Line Is Still the Honest Starting Point, Two Hundred Years On}\label{sec:intro}
 
-\subsection{The question this tutorial answers}
+\subsection{The questions this tutorial answers}
 
-Every machine-learning course, every statistics textbook, and every data-science bootcamp introduces linear regression within the first two weeks. And almost all of them do it backwards: they hand you a formula,
+Every machine learning course and every statistics textbook teaches linear regression in the first two weeks, and almost all of them teach it the same way: you are handed a formula
 \[
-  \hat{\beta} = (\X^\top \X)^{-1} \X^\top \y,
+  \widehat{\bm{\beta}} = (\X^\top \X)^{-1} \X^\top \y,
 \]
-tell you to trust it, and move on to ``more exciting'' models.
+told to memorize it, and then rushed off toward ``more exciting'' models.
 
-This tutorial goes the other way. We will earn every step. By the end you will be able to answer, from first principles:
+This tutorial does the opposite: every step is earned from scratch. By the end, you should be able to answer, from first principles:
 
 \begin{enumerate}[label=(\arabic*)]
-  \item Why do we fit a \emph{line} (or hyperplane) at all? What is the underlying assumption, and how strong is it?
-  \item Why \emph{squared} error? Why not absolute error, or error to the fourth power?
-  \item Where does the magic formula $\hat{\beta} = (\X^\top\X)^{-1}\X^\top\y$ come from, and what does it mean geometrically?
-  \item Under what conditions is the ordinary least squares (OLS) estimator the \emph{best} estimator? (Answer: the Gauss--Markov theorem.)
-  \item What do we gain — and what do we quietly assume — when we view regression through probability (maximum likelihood)?
-  \item Why does adding a penalty term (ridge, lasso) help, and what does the bias--variance trade-off have to do with it?
-  \item Why does a 200-year-old linear method still sit underneath logistic regression, neural networks, and half of modern statistics?
+  \item Why is the slope of one-dimensional regression $\dfrac{\Cov(x,y)}{\Var(x)}$? What exactly is its relationship to the Pearson correlation coefficient? (Chapter~\ref{sec:onedim})
+  \item Why can a straight line measure the \textit{correlation} between $x$ and $y$, yet tell you nothing about the \textit{direction} of causation? (Chapter~\ref{sec:onedim})
+  \item Why squared error? What exactly would be lost with a different loss? (Section~\ref{sec:why-square})
+  \item In high dimensions, when the sample size $n$ far exceeds the dimension $d$, why does least squares admit the closed-form solution $\widehat{\bm{\beta}} = (\X^\top\X)^{-1}\X^\top\y$? When is this solution unique, and when is it optimal? (Chapter~\ref{sec:highdim})
+  \item When $n$ no longer dwarfs $d$, what breaks first, and what repairs it? (Section~\ref{sec:hd-break})
+  \item Putting the closed form and the gradient-descent iteration side by side, what is the exact solution of $\widehat{\bm{\beta}}_t$? What does the fixed point mean? (Chapter~\ref{sec:gd})
+  \item When $d > n$ and the solutions form a manifold, where does the iteration converge? How is it related to the pseudoinverse solution? (Chapter~\ref{sec:gd-underdet})
+  \item How are regression coefficients related to the covariance and precision matrices? How does ``estimation'' graduate into ``inference'' --- from estimate to inference? (Chapter~\ref{sec:ggm})
+  \item When the observed features are in fact nonlinear projections of latent variables, why does linear regression behave as a kernel method? (Chapter~\ref{sec:kernel})
 \end{enumerate}
 
-\subsection{A 200-year-old idea that refuses to die}
+\subsection{A two-hundred-year-old idea that refuses to retire}
 
-Least squares was published independently by Legendre (1805) and Gauss (1809), who used it to predict the orbit of the asteroid Ceres from noisy astronomical observations. The method has survived every paradigm shift since: the computer, the bootstrap, the deep-learning revolution. There is a reason.
+Least squares was first published by Legendre (1805) and independently proposed by Gauss (1809), who gave it a full probabilistic derivation and used it to predict the orbit of Ceres from noisy astronomical observations\cite{legendre1805,gauss1809}. The method has outlived every paradigm shift since: the computer, the bootstrap, the deep learning revolution. For exactly one reason:
 
-\begin{keybox}[Thesis of this tutorial]
-Linear regression is not popular because real-world relationships are linear. They rarely are. It is popular because
+\begin{keybox}[The thesis of this tutorial]
+Linear regression is popular not because the world is linear --- it rarely is. It is popular because:
 \begin{enumerate}[label=(\roman*)]
-  \item a local linear approximation is often good enough (Taylor's theorem);
-  \item it is the \emph{uniquely solvable, uniquely interpretable, uniquely honest} baseline — everything else is measured against it;
-  \item it is the exact foundation on which logistic regression, generalized linear models, kernel methods, and even neural networks are built.
+  \item a local linear approximation is often good enough (Taylor's theorem guarantees that every smooth function is approximately linear locally);
+  \item it is the \textit{only} baseline that is exactly solvable, interpretable, and auditable --- every other model measures itself against it;
+  \item it is the foundation of logistic regression, generalized linear models, kernel methods, and even the output layer of neural networks.
 \end{enumerate}
 \end{keybox}
 
-\subsection{What you need to know before starting}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/ch1_galton.pdf}
+  \caption{Galton's ``regression toward the mean'' (recreated with simulated data): the regression line (red) is always flatter than $y=x$ (gray dashed) --- the slope is $r\,\sigma_y/\sigma_x$, so as long as $|r|<1$, extremes necessarily fall back. Two hundred years on, this straight line is still the default starting point of data analysis.}
+  \label{fig:ch1-galton}
+\end{figure}
+
+\subsection{Prerequisites}
 
 \begin{itemize}
-  \item \textbf{Calculus}: partial derivatives, the chain rule, and the fact that a minimum of a smooth function occurs where its derivative is zero.
-  \item \textbf{Linear algebra}: vectors, matrices, matrix multiplication, transpose, inverse; matrix-vector products as linear combinations. Appendix~\ref{app:linalg} collects everything we use.
-  \item \textbf{Probability} (helpful, not required until Chapter~\ref{sec:probability}): expectation, variance, the Gaussian distribution.
+  \item \textbf{Calculus}: partial derivatives, the chain rule, and the fact that extrema of smooth functions occur where derivatives vanish;
+  \item \textbf{Linear algebra}: vectors, matrices, matrix multiplication, transpose, inverse; the reading of ``matrix times vector as a linear combination of columns'';
+  \item \textbf{Probability} (used from Chapter~2 onward): expectation, variance, covariance, correlation.
 \end{itemize}
 
-Everything else is derived here.
+Everything else is derived in the text.
 
-\subsection{The setup, stated once and for all}
+\subsection{Notation, stated once}
 
-We are given $n$ observations. Each observation $i$ consists of a \emph{response} (target, dependent variable) $y_i \in \R$ and $p$ \emph{features} (predictors, covariates, independent variables) $x_{i1}, \dots, x_{ip} \in \R$. We believe the responses were generated as
-\begin{equation}\label{eq:model}
-  y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \dots + \beta_p x_{ip} + \varepsilon_i,
-  \qquad i = 1, \dots, n,
-\end{equation}
-where $\beta_0, \dots, \beta_p$ are unknown constants we want to estimate, and $\varepsilon_i$ is an \emph{error term} capturing everything the line misses: measurement noise, omitted variables, genuine randomness, and the sin of approximating a nonlinear world with a hyperplane.
+One-dimensional case: $n$ paired observations $(x_i, y_i) \in \R^2$, $i = 1, \dots, n$. High-dimensional case: responses $y_i \in \R$, features $\x_i = (x_{i1}, \dots, x_{id})^\top \in \R^d$, design matrix $\X \in \R^{n \times d}$ (rows equal to $\x_i^\top$), parameters $\bbeta \in \R^d$. The error terms $\varepsilon_i$ absorb everything a hyperplane cannot explain: measurement noise, omitted variables, genuine randomness, and the original sin of approximating a nonlinear world with a hyperplane.
 
-In matrix form, with $\X \in \R^{n \times (p+1)}$ the design matrix whose $i$-th row is $(1, x_{i1}, \dots, x_{ip})$, $\bbeta \in \R^{p+1}$ the parameter vector, and $\bm{\varepsilon} \in \R^n$ the errors:
-\begin{equation}\label{eq:model-matrix}
-  \y = \X \bbeta + \bm{\varepsilon}.
-\end{equation}
-
-The whole game of this tutorial is understanding what the words ``linear'' and ``error'' really commit us to, and what the best possible estimate of $\bbeta$ is under each interpretation.
-
-\begin{remark}[Linear in \emph{what}?]
-``Linear'' in \emph{linear regression} means linear in the \emph{parameters} $\beta_j$, not necessarily linear in the raw features. The model $y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 \sin x + \varepsilon$ is perfectly linear by our definition: define the new features $\tilde{x}_1 = x$, $\tilde{x}_2 = x^2$, $\tilde{x}_3 = \sin x$ and it has the form of \eqref{eq:model}. What is \emph{not} linear is $y = \beta_0 + e^{\beta_1 x} + \varepsilon$. This flexibility — turning nonlinear relationships into linear ones by feature engineering — is a recurring theme (Chapter~\ref{sec:beyond}).
-\end{remark}
+Conventions:
+\[
+  \bar{x} = \frac{1}{n}\sum_{i=1}^n x_i, \qquad
+  \Var_n(x) = \frac{1}{n}\sum_{i=1}^n (x_i - \bar{x})^2, \qquad
+  \Cov_n(x, y) = \frac{1}{n}\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y}),
+\]
+i.e., sample variance and covariance with denominator $n$ (using $n-1$ would only introduce an immaterial factor into every ratio). Throughout, $\Var$ and $\Cov$ without a subscript denote population quantities taken with respect to expectation, and the subscript $n$ denotes sample quantities.

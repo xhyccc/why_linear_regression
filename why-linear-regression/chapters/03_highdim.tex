@@ -1,0 +1,188 @@
+% Chapter 3
+\section[High dimensions: the closed-form world]{High-Dimensional Linear Regression: The Closed-Form World When $n \gg d$}\label{sec:highdim}
+
+One dimension builds intuition; high dimensions do the work. This chapter considers a sample of size $n$ and feature dimension $d$, with the model
+\begin{equation}\label{eq:hd-model}
+  y_i = \x_i^\top \bbeta + \varepsilon_i,
+  \qquad \text{i.e.} \qquad
+  \y = \X \bbeta + \bm{\varepsilon},
+\end{equation}
+where $\X = [\x_1^\top; \dots; \x_n^\top] \in \R^{n \times d}$ is the design matrix, $\y \in \R^n$, and $\bbeta \in \R^d$ is unknown. We first derive the closed-form solution in the classical \textbf{overdetermined} regime $n \gg d$, then read off its geometric and statistical meaning, and finally watch what breaks first as $n$ approaches $d$ — and how to fix it.
+
+\subsection{Least Squares and the Normal Equations}\label{sec:hd-ls}
+
+The total residual sum of squares is
+\begin{equation}\label{eq:hd-rss}
+  S(\bbeta) = \sum_{i=1}^n \big( y_i - \x_i^\top \bbeta \big)^2 = \norm{\y - \X \bbeta}^2
+  = \y^\top \y - 2 \bbeta^\top \X^\top \y + \bbeta^\top \X^\top \X \bbeta .
+\end{equation}
+Using the vector calculus identities $\nabla_{\bbeta}(\bm{c}^\top \bbeta) = \bm{c}$ and $\nabla_{\bbeta}(\bbeta^\top \bm{A} \bbeta) = 2\bm{A}\bbeta$ (for symmetric $\bm{A}$), the gradient is
+\begin{equation}\label{eq:hd-grad}
+  \nabla_{\bbeta} S = -2 \X^\top \y + 2 \X^\top \X \bbeta .
+\end{equation}
+Setting it to zero yields the \textbf{normal equations}:
+\begin{equation}\label{eq:normal-eq}
+  \boxed{\;\X^\top \X \, \bhat = \X^\top \y\;}
+\end{equation}
+
+\subsection{The Closed-Form Solution for $n \gg d$: Existence, Uniqueness, Computability}\label{sec:hd-closed}
+
+\begin{theorem}[Closed-form solution and uniqueness]\label{thm:closed-form}
+If $\X$ has full column rank, i.e.\ $\rank(\X) = d$ (equivalently, its $d$ columns are linearly independent, which requires $n \ge d$), then the Gram matrix $\X^\top\X \in \R^{d \times d}$ is symmetric positive definite and invertible, and the normal equations have the unique solution
+\begin{equation}\label{eq:ols-closed}
+  \boxed{\;\bhat = (\X^\top \X)^{-1} \X^\top \y\;}
+\end{equation}
+Moreover, since the Hessian $\nabla^2 S = 2 \X^\top \X \succ \zero$, $S$ is strictly convex and \eqref{eq:ols-closed} is the \textit{unique global minimizer} of $S$.
+\end{theorem}
+\begin{proof}
+For any $\bm{v} \neq \zero$, $\bm{v}^\top \X^\top \X \bm{v} = \norm{\X \bm{v}}^2 > 0$: if it were $0$ then $\X\bm{v} = \zero$, contradicting linear independence of the columns. Hence $\X^\top\X \succ \zero$; a positive definite matrix is invertible (all its eigenvalues are positive), and substitution gives \eqref{eq:ols-closed}. A stationary point of a strictly convex function is its unique global minimizer.
+\end{proof}
+
+Note what the condition really says. ``$n \gg d$'' is merely colloquial for ``ample sampling''; the theorem requires only \textbf{full column rank} — it guarantees that the map from $\bbeta$ to the fitted values $\X\bbeta$ has no redundant direction, so the parameters are uniquely determined by the data. In practice $n \gg d$ makes full column rank \textit{highly likely} (a random design with a continuous distribution is almost surely of full rank); this is the default working regime of classical statistics.
+
+For completeness, the rank-deficient case: if some column is an exact linear combination of the others (perfect collinearity), $\X^\top\X$ is singular and $\bhat$ is not unique — but the fitted values $\X\bhat$ still are. All minimum-norm solutions are given uniformly by the \textbf{Moore--Penrose pseudoinverse} $\X^+$\cite{penrose1955}:
+\begin{equation}\label{eq:pseudo}
+  \bhat = \X^+ \y,
+\end{equation}
+which is exactly what R's \texttt{lm}, NumPy's \texttt{lstsq}, and scikit-learn's \texttt{LinearRegression} compute (via QR/SVD factorizations rather than explicit inversion; see Section~\ref{sec:hd-compute}).
+
+\subsection{Geometry: A Projection, Again}\label{sec:hd-geometry}
+
+Think of the columns of $\X$ as $d$ vectors in $\R^n$; their column space
+\[
+  \mathcal{C}(\X) = \{\X \bbeta : \bbeta \in \R^d\} \subseteq \R^n
+\]
+is the set of \textbf{all fitted-value vectors the model can produce}. Fitting the model means finding the point of $\mathcal{C}(\X)$ closest to $\y$, and Euclidean distance is exactly $\norm{\y - \X\bbeta}$ — the square root of the loss \eqref{eq:hd-rss}. Hence:
+
+\begin{keybox}[The geometric statement of least squares]
+\[
+  \bhat = \arg\min_{\bbeta} \norm{\y - \X \bbeta}
+  \quad\Longleftrightarrow\quad
+  \X \bhat \text{ is the orthogonal projection of } \y \text{ onto } \mathcal{C}(\X).
+\]
+\end{keybox}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=1.5, >=Stealth, font=\small]
+    % column-space plane C(X)
+    \draw[fill=blue!6, opacity=0.9] (-3.0,-1.3) -- (3.2,-0.6) -- (2.6,1.9) -- (-3.6,1.2) -- cycle;
+    \node[blue!55!black, font=\small] at (0.2,-1.62) {$\mathcal{C}(\X)$ (column space, a $d$-dimensional plane)};
+    % y vector and projection
+    \coordinate (O) at (-1.3,-0.25);
+    \coordinate (Y) at (1.35,3.4);
+    \coordinate (P) at (0.5,1.05);
+    \draw[->, very thick, gray!45!black] (O) -- (Y) node[above=2pt] {$\y$};
+    \draw[->, very thick, red!60!black] (O) -- (P)
+        node[pos=0.75, below left=1pt] {$\X\widehat{\bbeta}$ (foot of the perpendicular)};
+    \draw[->, very thick, green!45!black] (P) -- (Y)
+        node[midway, right=2pt, align=left] {$\bm{e}=\y-\X\widehat{\bbeta}$\\ (residual $\perp$ column space)};
+    % right-angle mark
+    \draw[green!45!black] ($(P)+(-0.17,-0.12)$) -- ++(-0.065,0.15) -- ++(0.18,0.075);
+    % fitted values for another beta
+    \coordinate (Q) at (2.2,0.5);
+    \draw[->, thick, gray!70] (O) -- (Q)
+        node[below right=-1pt] {$\X\bbeta$ (any other fit)};
+    \draw[dashed, gray!70] (Y) -- (Q);
+    \node[gray!70, rotate=-24, font=\small] at (2.45,2.15) {$\norm{\y-\X\bbeta}\ge\norm{\bm{e}}$};
+  \end{tikzpicture}
+  \caption{The geometry of least squares: the foot of the perpendicular from $\y$ to the column space $\mathcal{C}(\X)$ is $\X\widehat{\bbeta}$. The vertical segment $\bm{e}$ is the shortest residual (green); any other fit $\X\bbeta$ (gray) reaches $\y$ along a longer slanted line — perpendicularity \emph{is} optimality.}
+  \label{fig:ch3-projection}
+\end{figure}
+
+The normal equations $\X^\top(\y - \X\bhat) = \zero$ say: \textbf{the residual vector is orthogonal to every column of $\X$} (``normal'' is geometry-speak for ``perpendicular''). By Pythagoras, for any other $\X\bbeta \in \mathcal{C}(\X)$,
+\[
+  \norm{\y - \X\bbeta}^2 = \norm{\X(\bhat - \bbeta)}^2 + \norm{\bm{e}}^2 \ge \norm{\bm{e}}^2,
+\]
+with equality if and only if $\bbeta = \bhat$ — a proof with no calculus: perpendicularity implies optimality.
+
+This yields a matrix that runs through all of regression computation. The \textbf{hat matrix}
+\begin{equation}\label{eq:hat}
+  \bm{H} = \X (\X^\top \X)^{-1} \X^\top,
+  \qquad
+  \hat{\y} = \bm{H} \y, \quad \bm{e} = (\bm{I} - \bm{H})\y .
+\end{equation}
+Verify directly: $\bm{H}^\top = \bm{H}$ and $\bm{H}^2 = \bm{H}$ — \textbf{symmetric $+$ idempotent $=$ orthogonal projection matrix}. Two consequences ready for use: $\trace(\bm{H}) = \trace((\X^\top\X)^{-1}\X^\top\X) = d$ (the origin of the $d$ degrees of freedom, the residuals consuming $n - d$); the diagonal entries $H_{ii} \in [0,1]$ measure the \textbf{leverage} of observation $i$ (an outlying $\x$ pushes $H_{ii}$ up — the starting point of regression diagnostics). All one-dimensional conclusions generalize: fitted values and residuals are orthogonal, and $R^2$ is still the ``fraction of variance explained.''
+
+\subsection{Statistics: When Is This Closed-Form Solution ``Optimal''?}\label{sec:hd-gm}
+
+The closed form only promises ``closest to the data.'' Statistics asks: as an \textit{estimator} of the unknown truth $\bbeta$, how good is it? The \textbf{Gauss--Markov theorem}, proved by Gauss (1823) and later formalized by Markov (1912), answers\cite{gauss1823}:
+
+\begin{keybox}[Gauss--Markov, informal statement]
+Under model \eqref{eq:hd-model}, if the errors satisfy: zero mean ($\E[\bm{\varepsilon}] = \zero$, i.e.\ correct model specification), homoskedastic and uncorrelated ($\Var(\bm{\varepsilon}) = \sigma^2 \bm{I}$), and $\X$ has full column rank — \textbf{without assuming any error distribution} — then the least squares estimator $\bhat$ has the smallest variance among all estimators that are linear in $\y$ and unbiased: it is the \emph{Best Linear Unbiased Estimator} (BLUE).
+\end{keybox}
+
+Proof skeleton (the full argument is Exercise~\ref{ex:gm}): write any linear unbiased competitor as $\tilde{\bbeta} = (\bm{B} + \bm{D})\y$ with $\bm{B} = (\X^\top\X)^{-1}\X^\top$; unbiasedness forces $\bm{D}\X = \zero$. Then
+\[
+  \Var(\tilde{\bbeta}) = \sigma^2(\bm{B} + \bm{D})(\bm{B} + \bm{D})^\top
+  = \underbrace{\sigma^2 \bm{B}\bm{B}^\top}_{\Var(\bhat)} + \underbrace{\sigma^2 \bm{D}\bm{D}^\top}_{\succeq\, \zero},
+\]
+the cross terms vanishing because $\bm{D}\X = \zero$. In one sentence: \textit{any unbiased deviation from OLS is a zero-mean perturbation uncorrelated with OLS, and an uncorrelated perturbation can only add variance.}
+
+Two qualifiers mark the theorem's boundaries:
+\begin{itemize}
+  \item \textbf{``Linear''}: if one further assumes Gaussian errors, the Cram\'er--Rao lower bound shows that \textit{no} unbiased estimator whatsoever (linear or not) can beat $\bhat$;
+  \item \textbf{``Unbiased''}: once bias is permitted (ridge, lasso), smaller mean squared error becomes available — see Section~\ref{sec:hd-break}.
+\end{itemize}
+
+\subsection{Why Squared Error, of All Losses?}\label{sec:why-square}
+
+Question (3) from the introduction can now be answered head-on. What exactly is lost by switching to another loss? Three progressively deeper answers.
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{The geometric--optimization answer}: squaring makes the loss quadratic — differentiable, strictly convex, stationary point equals global optimum, and the normal equations are a \textit{linear} system; Chapter~\ref{sec:gd} will further show that it gives gradient descent an exact closed-form solution in $t$. Switch to absolute-value loss: still convex, but nondifferentiable at zero, the optimum is a median rather than a mean, and the ``normal equations'' become a set of piecewise-linear conditions — the same door opens into a far more complicated room.
+  \item \textbf{The probabilistic answer} (Gauss, 1809): if $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$ i.i.d., the likelihood of the data is proportional to
+  \[
+    \exp\Big( -\tfrac{1}{2\sigma^2} \norm{\y - \X\bbeta}^2 \Big),
+  \]
+  so maximizing the likelihood $\Longleftrightarrow$ minimizing the sum of squared residuals — \textbf{squared error is exactly maximum likelihood under Gaussian noise}\cite{gauss1809}. It was along this route that Gauss gave least squares its probabilistic foundation, arguing that ``nature measures errors by the bell curve.'' This answer confers an \textbf{hypothesis identity} on the loss: squared error asserts that ``large errors become exponentially-squared unlikely,'' a far more aggressive claim than the Laplace assumption behind median regression (exponential-linear decay) — and outliers pull the squared-error solution correspondingly harder.
+  \item \textbf{The statistical answer}: it \emph{is} Gauss--Markov — under the \textit{weak} conditions of zero mean, homoskedasticity, and uncorrelatedness, $\bhat$ is already optimal among all linear unbiased estimators in the minimum-variance sense; with Gaussian errors, Cram\'er--Rao upgrades this to optimality among \textit{all} unbiased estimators.
+\end{enumerate}
+
+One-sentence summary: \textit{squared error is the shadow cast by the assumption pair ``errors approximately Gaussian $+$ estimator required to be linear and unbiased.''} Changing the loss (absolute, Huber, quantile) is never ``just a different metric'' — it is a different theory of the error world. Audit the assumptions first, then talk about changing the loss; that is precisely the entry point of robust regression and generalized linear models.
+
+\begin{exercise}\label{ex:gm}
+Complete the proof of the Gauss--Markov theorem: show that any linear unbiased estimator $\tilde{\bbeta} = \bm{A}\y$ can be written as $(\bm{B} + \bm{D})\y$ (with $\bm{B} = (\X^\top\X)^{-1}\X^\top$) where $\bm{D}\X = \zero$, and derive $\Var(\tilde{\bbeta}) - \Var(\bhat) = \sigma^2 \bm{D}\bm{D}^\top \succeq \zero$.
+\end{exercise}
+
+\subsection{When $n$ No Longer Dominates $d$: What Breaks, and How to Fix It}\label{sec:hd-break}
+
+The Gauss--Markov world is entirely an $n \gg d$ world. Now push $n$ toward $d$, in order of breakage:
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{$d \to n$: $\X^\top\X$ becomes ill-conditioned.} Some feature directions are barely supported by the data (small eigenvalues), and $(\X^\top\X)^{-1}$ amplifies noise precisely along them — the variance of $\bhat$ explodes (the diagonal entries of the covariance $\sigma^2(\X^\top\X)^{-1}$ blow up), the \textit{signs} of coefficients can be unstable, while predictions at the observed points remain fine. The disease lives in parameter space, not in prediction space.
+  \item \textbf{$d = n$: $\X$ is square and invertible, residuals are zero.} Fitting becomes interpolation: training error $0$, generalization error takes off — the algebraic face of overfitting.
+  \item \textbf{$d > n$: $\X^\top\X$ is necessarily singular.} Infinitely many solutions exist; OLS is \textit{undefined}, and external force must pick one.
+\end{enumerate}
+
+The fixes share one idea: impose a ``size budget'' on the parameters. \textbf{Ridge regression} (Hoerl \& Kennard, 1970)\cite{hoerl1970}:
+\begin{equation}\label{eq:ridge}
+  \bhat^{\mathrm{ridge}} = \arg\min_{\bbeta} \; \norm{\y - \X \bbeta}^2 + \lambda \norm{\bbeta}^2
+  \quad\Longrightarrow\quad
+  \bhat^{\mathrm{ridge}} = (\X^\top \X + \lambda \bm{I})^{-1} \X^\top \y .
+\end{equation}
+Three perspectives: \textbf{numerically}, $\X^\top\X + \lambda\bm{I} \succ \zero$ always — any $\lambda > 0$ restores uniqueness; \textbf{geometrically}, it is the Lagrange form of the constrained problem $\min \norm{\y - \X\bbeta}^2$ s.t.\ $\norm{\bbeta}^2 \le c$, shrinking coefficients along the ill-conditioned directions; \textbf{statistically}, via the SVD $\X = \bm{U}\bm{D}\bm{V}^\top$, ridge replaces each $1/d_j$ of OLS by $d_j/(d_j^2 + \lambda) < 1/d_j$ — \textit{taming exactly the small-singular-value directions that OLS amplifies}. The cost is bias (Exercise~\ref{ex:ridge-bias}); the gain is a large reduction in variance, so the total mean squared error actually decreases in the weak-signal regime. \textbf{Lasso} (Tibshirani, 1996) swaps in the $\ell_1$ penalty $\lambda\norm{\bbeta}_1$, driving some coefficients to exactly $0$ and performing variable selection on the way\cite{tibshirani1996}. The penalty $\lambda$ is chosen by cross-validation, which estimates prediction error — and the loop closes: \textit{regularization is not the opposite of OLS; it is OLS's survival plan when $d \approx n$.}
+
+\begin{exercise}\label{ex:ridge-bias}
+Derive the expression for $\bhat^{\mathrm{ridge}}$ from \eqref{eq:ridge} and show that its bias is $-\lambda(\X^\top\X + \lambda\bm{I})^{-1}\bbeta$.
+\end{exercise}
+
+\subsection{A Computational Note: What Proofs Write vs.\ What Engineers Run}\label{sec:hd-compute}
+
+In \textit{proofs} we write $(\X^\top\X)^{-1}\X^\top\y$; in \textit{computation} nobody ever inverts — forming $\X^\top\X$ squares the condition number of $\X$ and is numerical self-sabotage. The engineering route is the QR factorization $\X = \bm{Q}\bm{R}$ ($\bm{Q}$ with orthonormal columns, $\bm{R}$ upper triangular), giving
+\[
+  \bm{H} = \bm{Q}\bm{Q}^\top,
+  \qquad
+  \bhat = \bm{R}^{-1}\bm{Q}^\top \y \;\;(\text{back-substitution; never an explicit inverse}).
+\]
+$\bm{Q}^\top\y$ is exactly the projection coordinate of $\y$ in an orthogonal basis — the geometry of Section~\ref{sec:hd-geometry} \emph{is} what runs on the computer. \textbf{The proof's formula and the computation's algorithm are two faces of one object}: another standard answer to ``why study linear regression'' — it is the only model where both faces can be seen clearly at the same time.
+
+\begin{keybox}[Chapter takeaways]
+\begin{itemize}
+  \item High-dimensional least squares has the unique closed-form solution $\bhat = (\X^\top\X)^{-1}\X^\top\y$ whenever $\X$ has full column rank (almost surely when $n \gg d$); strict convexity makes it the global optimum;
+  \item Geometrically it is the orthogonal projection of $\y$ onto the column space; the hat matrix $\bm{H} = \X(\X^\top\X)^{-1}\X^\top$ is symmetric and idempotent, with $\trace(\bm{H}) = d$ degrees of freedom;
+  \item Gauss--Markov: under zero-mean, homoskedastic, uncorrelated errors, OLS is BLUE — optimality with zero distributional assumptions; with Gaussian errors, upgraded to optimal among \emph{all} unbiased estimators;
+  \item As $d \to n$ the variance explodes first (ill-conditioning), and at $d \ge n$ the solution ceases to be unique (singularity); ridge $(\X^\top\X + \lambda\bm{I})^{-1}\X^\top\y$ and lasso are the regularized fixes of the same idea, with $\lambda$ chosen by cross-validation;
+  \item In practice QR/SVD replaces explicit inversion; proof and computation are two faces of one geometry.
+\end{itemize}
+\end{keybox}

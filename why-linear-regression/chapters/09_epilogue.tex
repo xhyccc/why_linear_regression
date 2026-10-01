@@ -1,0 +1,68 @@
+% Chapter 9
+\section{Epilogue: So, Why Linear Regression?}\label{sec:epilogue}
+
+Gather the eight threads.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      box/.style={draw=blue!50!black, fill=blue!5, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+      kern/.style={draw=green!45!black, fill=green!6, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+      net/.style={draw=red!55!black, fill=red!5, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.9cm, minimum height=1.35cm},
+      arr/.style={->, >=Stealth, thick, gray!50!black},
+      lab/.style={midway, font=\scriptsize, fill=white, inner sep=1.5pt}]
+    \node[box] (onedim) at (0,0) {One dimension: slope $=$ correlation\\correlation vs.\ causation\\(Ch.~2)};
+    \node[box] (highdim) at (5.1,0) {Closed form in high dimensions\\$\bhat=(\X^\top\X)^{-1}\X^\top\y$\\(Ch.~3)};
+    \node[box] (gd) at (10.2,0) {Iterative view: GD\\spectral filtering, fixed points\\(Ch.~4)};
+    \node[box] (under) at (10.2,-2.7) {Underdetermined: min-norm\\$\widehat{\bbeta}'=\X^\top(\X\X^\top)^{-1}\y$\\implicit regularization (Ch.~5)};
+    \node[box] (inf) at (5.1,-2.7) {Inference: precision matrix\\conditional-independence tests\\(Ch.~6)};
+    \node[box] (fdr) at (5.1,-5.3) {Inference at scale: FDR\\BH and knockoffs\\(Ch.~7)};
+    \node[kern] (kernel) at (0,-2.7) {Kernels: $\x=\phi(z)$\\kernel $=$ inner-product interface\\(Ch.~8)};
+    \node[net] (ntk) at (0,-5.3) {Deep networks: random features\\ridgeless regression and NTK\\(Sec.~8.5)};
+    \draw[arr] (onedim) -- (highdim) node[lab]{generalize};
+    \draw[arr] (highdim) -- (gd) node[lab]{inversion $=$ iteration};
+    \draw[arr] (gd) -- (under) node[lab, right=2pt]{$d>n$};
+    \draw[arr] (under) -- (inf) node[lab]{};
+    \draw[arr] (inf) -- (kernel) node[lab]{};
+    \draw[arr] (inf) -- (fdr) node[lab, right=2pt]{multiple testing};
+    \draw[arr] (onedim) -- (kernel) node[lab, left=2pt]{feature map};
+    \draw[arr] (kernel) -- (ntk) node[lab, left=2pt]{wide limit};
+  \end{tikzpicture}
+  \caption{The roadmap of this book: starting from one straight line, proceeding along the two routes of closed form and iteration, converging in the underdetermined case to minimum-norm interpolation, upgrading through the precision matrix into per-coefficient inference, then through multiple testing into inference at scale (how much of a page of conclusions can be trusted), then kernelizing through the feature map, and finally bridging to the wide limit of deep networks.}
+  \label{fig:ch8-roadmap}
+\end{figure}
+
+\textbf{The one-dimensional thread}: least squares generalizes ``the mean'' into ``the line''; the slope $\hat{b} = r\,\sigma_y/\sigma_x$ lets the correlation coefficient emerge naturally from geometric optimization; and the variance decomposition $\Var(y) = b^2\Var(x) + \Var(\varepsilon)$ shows that correlation is, in essence, a transfer of variance. The same straight line exposes the \textit{symmetry} of the correlation measure ($r$) versus the \textit{directionality} of the regression operation ($y \sim x$ and $x \sim y$ are two lines), and quantifies Galton's ``regression toward the mean'' through the product $r^2 < 1$ of the two regression coefficients. And the causal direction --- $x \to y$, $y \to x$, or a common cause --- generates identical correlation structure and can only be identified outside the data\cite{wright1921,reichenbach1956}.
+
+\textbf{The high-dimensional thread}: when $n \gg d$, least squares gives a unique, global, closed-form solution $\bhat = (\X^\top\X)^{-1}\X^\top\y$, the orthogonal projection of $\y$ onto the column space, and --- under extremely weak error assumptions --- the best linear unbiased estimator in the Gauss--Markov sense\cite{gauss1823}. As $n$ approaches $d$, the variance breaks first and the rank breaks second; ridge and lasso trade a budget of bias back for variance, letting the same framework extend into modern high-dimensional statistics\cite{hoerl1970,tibshirani1996}.
+
+\textbf{The optimization thread}: the closed form $\bhat = (\X^\top\X)^{-1}\X^\top\y$ and gradient descent $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ are two paths to the same object --- the fixed-point condition $\nabla L = \zero$ \emph{is} the normal equation; combining the two, the iterate has the exact expression $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$, where the convergence condition $0 < \eta < 2/\lambda_{\max}$ and the optimal rate $(\kappa-1)/(\kappa+1)$ promote ``standardize your features'' from folklore to theorem. Inverting in one step, and mortgaging the inverse with a $t$-term polynomial, are two faces of one geometry.
+
+\textbf{The underdetermined thread}: when $d > n$, solutions are no longer unique but form the manifold $\widehat{\bbeta}' + \mathcal{N}(\X)$, on which every point is an interpolating solution and a GD fixed point; the manifold attracts transversally while individual points are only Lyapunov stable, and the landing point is decided by the null-space component of the initialization. $\widehat{\bbeta}' = \X^\top(\X\X^\top)^{-1}\y$ is the unique minimum-norm point on the manifold --- exactly the pseudoinverse solution $\X^+\y$; GD starting from zero converges to it implicitly, and ridge with $\lambda \to 0^+$ converges to it too. \textit{The five faces (two closed forms, the pseudoinverse, the GD-from-zero limit, the ridge zero limit) are one and the same minimum-norm least-squares solution} --- the linear prototype of ``regularization without penalty'' in the overparameterized era.
+
+\textbf{The inference thread}: regression coefficients are elements of the precision matrix, $\beta_j = 0 \Leftrightarrow y \perp x_j \mid \x_{-j}$ --- the one-dimensional ``correlation vs.\ causation'' graduates into the conditional-independence language of graphical models\cite{lauritzen1996}; lasso, elastic net, graphical lasso, and CLIME deliver sparse estimation under $d \gg n$, and the debiased lasso upgrades point estimates into asymptotically normal inference --- \textit{estimation answers ``which edges might exist,'' inference answers ``is this edge significant''}\cite{meinshausen2006,zou2005,friedman2008,cai2011,zhang2014,vandegeer2014}.
+
+\textbf{The FDR thread}: beyond the $p$-value of a single coefficient, the applied scientist faces a whole page of simultaneously tested conclusions. Bonferroni crushes the threshold to $\alpha/m$ and power collapses with $m$; Benjamini--Hochberg trades a slanted line $qk/m$ for ``tolerate a few false ones when there are many discoveries,'' controlling the expected false discovery proportion at $q$\cite{benjamini1995}; more satisfyingly, the BH threshold is exactly an adaptive sparse estimator of the $z$-scores, sharing its roots with the soft thresholding of Chapter~6 --- \textit{controlling the false discovery rate is not a patch on top of estimation; it is the dual of the sparsity assumption on the testing problem}\cite{abramovich2006}. Knockoffs take a more radical route: planting shadow variables inside the design matrix, they control the FDR of variable selection directly through exchangeability symmetry, without relying on any asymptotic normality of $p$-values\cite{barber2015}. \textit{Estimation says which edges might exist, inference says which edges are significant, and FDR says how many of this page to trust}.
+
+\textbf{The kernel thread}: when the observed features are nonlinear projections $\x_i = \phi(\bm{z}_i)$ of latent variables, the predictions of the two closed forms --- $\tilde{\x}^\top\widehat{\bbeta}' = \bm{k}(\tilde{\bm{z}})^\top \bm{K}^{-1}\y$ for $d > n$ and $\tilde{\x}^\top\bhat^{\mathrm{ridge}} = \bm{k}(\tilde{\bm{z}})^\top(\bm{K} + \lambda\bm{I})^{-1}\y$ for $n \gg d$ --- are assembled solely from the kernel function: linear in the features $\Leftrightarrow$ nonlinear in latent space, and kernelization with push-through are two sides of the same coin\cite{scholkopf2002,kimeldorf1970,rahimi2007}.
+
+\textbf{The historical thread}: from the appendix Legendre and Gauss wrote for the orbit of Ceres\cite{legendre1805,gauss1809}, through Galton's height scatterplots\cite{galton1886}, to every regression output layer today --- what has survived all of it is not a trick but a theorem about ``how data meets model.''
+
+\begin{keybox}[The final answer]
+Because linear regression is the \textbf{only} model that simultaneously does all four of the following:
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Exactly solvable}: a convex quadratic problem, closed-form solution, milliseconds, no hyperparameters, no local minima;
+  \item \textbf{Interpretable}: every coefficient has something to say; $R^2$, leverage, and degrees of freedom each have a geometric meaning;
+  \item \textbf{Auditable}: every theorem carries an explicit assumption list, and when the assumptions fail there are named diagnostics and repairs;
+  \item \textbf{Generalizable}: change the loss and get robust regression; add a penalty and get ridge/lasso; add features and get nonlinearity; iterate with weights and get GLMs; stack training and get neural networks.
+\end{enumerate}
+Fit the straight line first, audit the assumptions, disclose the weaknesses honestly --- and only then, and only after that, do fancier models get their turn.
+\end{keybox}
+
+\begin{exercise}\label{ex:orth-ridge}
+Suppose $\X^\top\X = n\bm{I}$ (orthogonal design). Find the $\lambda^\star$ minimizing $\MSE(\hat\beta_j^{\mathrm{ridge}})$, and show that $\lambda^\star > 0$ if and only if the coefficient is a ``weak signal''; use this to state precisely what ``shrinkage never hurts a strong signal and always helps a weak one'' means.
+\end{exercise}

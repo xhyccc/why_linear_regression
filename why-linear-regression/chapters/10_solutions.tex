@@ -1,0 +1,300 @@
+% Solutions to exercises (Appendix A)
+\appendix
+\section{Solutions to Exercises}\label{sec:solutions}
+
+\subsection{Chapter 3: High-Dimensional Linear Regression}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:gm} (completing the Gauss--Markov proof)]
+\textbf{Step 1 (unbiasedness $\Rightarrow$ a linear constraint).} $\E[\tilde{\bbeta}] = \bm{A}\X\bbeta = \bbeta$ for all $\bbeta$, so $\bm{A}\X = \bm{I}$. Take $\bm{B} = (\X^\top\X)^{-1}\X^\top$ (the OLS coefficient matrix, $\bm{B}\X = \bm{I}$) and let $\bm{D} := \bm{A} - \bm{B}$; then
+\[
+  \bm{D}\X = \bm{A}\X - \bm{B}\X = \bm{I} - \bm{I} = \zero .
+\]
+Conversely, for any $\bm{D}$ with $\bm{D}\X = \zero$, $(\bm{B}+\bm{D})\y$ is unbiased --- so ``unbiased linear estimators'' and ``OLS plus a null-space perturbation'' are the same family of objects.
+
+\textbf{Step 2 (variance comparison).} From $\Var(\bm{\varepsilon}) = \sigma^2\bm{I}$,
+\[
+  \Var(\tilde{\bbeta}) = \sigma^2 (\bm{B}+\bm{D})(\bm{B}+\bm{D})^\top
+  = \sigma^2\bm{B}\bm{B}^\top + \sigma^2\big(\bm{B}\bm{D}^\top + \bm{D}\bm{B}^\top\big) + \sigma^2\bm{D}\bm{D}^\top .
+\]
+The cross terms vanish: $\bm{D}\bm{B}^\top = \bm{D}\X(\X^\top\X)^{-1} = \zero$, and transposing gives $\bm{B}\bm{D}^\top = \zero$. Hence
+\[
+  \Var(\tilde{\bbeta}) - \Var(\bhat) = \sigma^2\,\bm{D}\bm{D}^\top \succeq \zero,
+\]
+since for any $\bm{v}$, $\bm{v}^\top \bm{D}\bm{D}^\top \bm{v} = \norm{\bm{D}^\top \bm{v}}^2 \ge 0$. Equality holds for all $\bm{v}$ if and only if $\bm{D} = \zero$, i.e., $\tilde{\bbeta} = \bhat$. $\square$
+
+\item[Exercise \ref{ex:ridge-bias} (the bias of ridge regression)]
+First-order condition: $(\X^\top\X + \lambda\bm{I})\,\bhat^{\mathrm{ridge}} = \X^\top\y$, i.e., $\bhat^{\mathrm{ridge}} = (\X^\top\X + \lambda\bm{I})^{-1}\X^\top\y$ (note $\X^\top\X + \lambda\bm{I}$ is positive definite for any $\lambda > 0$; no full-rank assumption needed). Taking expectations and using $\E[\y] = \X\bbeta$:
+\[
+\begin{aligned}
+  \E\big[\bhat^{\mathrm{ridge}}\big]
+  &= (\X^\top\X + \lambda\bm{I})^{-1}\X^\top\X\,\bbeta \\
+  &= \bbeta - \lambda\,(\X^\top\X + \lambda\bm{I})^{-1}\bbeta ,
+\end{aligned}
+\]
+where the second step splits $\X^\top\X$ into $(\X^\top\X + \lambda\bm{I}) - \lambda\bm{I}$ so the inverse cancels against itself. Hence the bias $= -\lambda(\X^\top\X + \lambda\bm{I})^{-1}\bbeta$: the direction is ``pulled toward the origin,'' and the magnitude is discounted direction-by-direction by $1/(\text{eigenvalue}+\lambda)$ --- consistent with the SVD analysis in the main text. $\square$
+\end{description}
+
+\subsection{Chapter 4: Gradient Descent, an Optimization View}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:gd-rate} (convergence bound under the optimal step size)]
+Let $\bm{A} = \bm{I} - \eta\X^\top\X$. From \eqref{eq:gd-exact} and $\widehat{\bbeta}_0 = \zero$:
+\[
+  \widehat{\bbeta}_t - \bhat = \bm{A}^t\big(\zero - \bhat\big) = -\bm{A}^t \bhat .
+\]
+$\bm{A}$ is symmetric, so $\norm{\bm{A}^t}_2 = \norm{\bm{A}}_2^t = \big(\max_j |1 - \eta\lambda_j|\big)^t$. Substituting $\eta = \eta^\star$ (Corollary~\ref{thm:gd-opt}), $\max_j|1 - \eta^\star\lambda_j| = \dfrac{\kappa - 1}{\kappa + 1} =: \rho^\star$, and therefore
+\[
+  \norm{\widehat{\bbeta}_t - \bhat} \le \big(\tfrac{\kappa-1}{\kappa+1}\big)^t \norm{\bhat}.
+\]
+To reach $\norm{\widehat{\bbeta}_t - \bhat} \le \varepsilon$ we need $(\rho^\star)^t \le \varepsilon / \norm{\bhat}$, i.e.,
+\[
+  t \;\ge\; \frac{\log\!\big(\norm{\bhat}/\varepsilon\big)}{\log\!\big(1/\rho^\star\big)} .
+\]
+When $\kappa \gg 1$, $\log\frac{1}{\rho^\star} = \log\frac{\kappa+1}{\kappa-1} \approx \frac{2}{\kappa}$, so $t = O\big(\kappa \log\!\frac{\norm{\bhat}}{\varepsilon}\big)$: the number of steps grows \textbf{linearly} with the condition number. $\square$
+
+\item[Exercise \ref{ex:neumann} (the Neumann identity)]
+Let $\bm{A} = \bm{I} - \eta\X^\top\X$; then $\eta\X^\top\X = \bm{I} - \bm{A}$, and by the normal equation $\X^\top\X\,\bhat = \X^\top\y$. Using the geometric-series identity $\bm{I} - \bm{A}^t = (\bm{I}-\bm{A})\sum_{k=0}^{t-1}\bm{A}^k$ (expand and telescope; no convergence needed):
+\[
+  \big[\bm{I} - \bm{A}^t\big]\bhat
+  = \eta\,\X^\top\X \sum_{k=0}^{t-1}\bm{A}^k\,\bhat
+  = \eta \sum_{k=0}^{t-1}\bm{A}^k\,\X^\top\y ,
+\]
+where the last step merges the adjacent $\X^\top\X$ and $\bhat$ into $\X^\top\y$. The left-hand side is exactly the left-multiplied form $\widehat{\bbeta}_t = [\bm{I} - \bm{A}^t]\bhat$ of \eqref{eq:gd-exact-zero} --- the $t$-step GD solution always equals ``applying the $t$-th partial-sum approximation of the inverse'' to $\bhat$. Note this identity is exact for every finite $t$, regardless of the size of $\eta$; convergence ($\bm{A}^t \to \zero$) is what requires $0 < \eta < 2/\lambda_{\max}$. $\square$
+\end{description}
+
+\subsection{Chapter 5: The Underdetermined Case and Implicit Regularization}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:ridge-dual} (the primal--dual identity of ridge, and the zero limit)]
+\textbf{The identity.} Multiply both sides on the left by $(\X^\top\X + \lambda\bm{I})$:
+\[
+  (\X^\top\X + \lambda\bm{I})\,\X^\top(\X\X^\top + \lambda\bm{I})^{-1}
+  = \X^\top(\X\X^\top + \lambda\bm{I})\,(\X\X^\top + \lambda\bm{I})^{-1}
+  = \X^\top ,
+\]
+(the first step uses $(\X^\top\X + \lambda\bm{I})\X^\top = \X^\top\X\X^\top + \lambda\X^\top = \X^\top(\X\X^\top + \lambda\bm{I})$, plain distributivity of matrix multiplication.)
+which equals the left-hand side's $\X^\top$; hence the identity holds (both matrices are well defined, since $\X^\top\X + \lambda\bm{I}$ and $\X\X^\top + \lambda\bm{I}$ are positive definite for $\lambda > 0$).
+
+\textbf{The zero limit.} Substitute the SVD $\X = \bm{U}\bm{\Sigma}\bm{V}^\top$ (singular values $s_j$); the $j$-th spectral component of the identity acting on $\y$ is
+\[
+  \frac{s_j}{s_j^2 + \lambda}\,(\bm{U}^\top\y)_j \;\xrightarrow[\lambda \to 0^+]{}\; \begin{cases} \dfrac{1}{s_j}(\bm{U}^\top\y)_j, & s_j > 0, \\[1ex] 0, & s_j = 0, \end{cases}
+\]
+and the right-hand side is exactly $\bm{V}\bm{\Sigma}^{+}\bm{U}^\top\y = \X^+\y$. No full-rank assumption was used anywhere --- this is a direct proof that ``ridge's zero limit $=$ the pseudoinverse solution,'' and also a special case of the push-through identity \eqref{eq:push-through}. $\square$
+
+\item[Exercise \ref{ex:gd-limit-anyinit} (the GD limit from an arbitrary initialization)]
+The general solution of iteration \eqref{eq:gd} (direct induction for a linear iteration):
+\[
+  \widehat{\bbeta}_t = \bm{A}^t \widehat{\bbeta}_0 + \eta \sum_{k=0}^{t-1} \bm{A}^k \X^\top\y, \qquad \bm{A} = \bm{I} - \eta\X^\top\X .
+\]
+\textbf{First term.} $\bm{A}$ is the identity on $\mathcal{N}(\X)$ and has spectral radius $< 1$ on $\mathrm{row}(\X)$ (for $0 < \eta < 2/\lambda_{\max}(\X\X^\top)$), so $\bm{A}^t \to \bm{P}_{\mathcal{N}(\X)} = \bm{I} - \X^+\X$ (the orthogonal projection onto the null space).
+
+\textbf{Second term.} As in the proof of Theorem~\ref{thm:gd-exact-underdet}: $\eta\sum_{k<t}\bm{A}^k\X^\top \to \X^\top(\X\X^\top)^{-1}$, i.e., $\widehat{\bbeta}'$.
+
+\textbf{Combining.} $\lim_t \widehat{\bbeta}_t = \widehat{\bbeta}' + \bm{P}_{\mathcal{N}(\X)}\widehat{\bbeta}_0$. The null-space component of the initialization is carried along the whole way (``null-space neutrality'' of Section~\ref{sec:stability}), while the row-space component converges to the nearest point on the manifold. When $\widehat{\bbeta}_0 = \zero$, $\bm{P}_{\mathcal{N}(\X)}\zero = \zero$, and we recover Theorem~\ref{thm:gd-exact-underdet} --- the two statements agree completely. $\square$
+
+\item[Exercise \ref{ex:spectrum} (the nonzero spectra of $\X^\top\X$ and $\X\X^\top$ coincide)]
+Let $\X^\top\X\,\bm{v} = \lambda\,\bm{v}$ with $\lambda \neq 0$, $\bm{v} \neq \zero$. First show $\bm{w} := \X\bm{v} \neq \zero$: if $\X\bm{v} = \zero$ then $\lambda\bm{v} = \X^\top\X\bm{v} = \zero$, contradicting $\lambda \neq 0$, $\bm{v} \neq \zero$. Then
+\[
+  (\X\X^\top)\,\bm{w} = \X\big(\X^\top\X\bm{v}\big) = \lambda\,\X\bm{v} = \lambda\,\bm{w},
+\]
+so $\bm{w}$ is an eigenvector of $\X\X^\top$ with eigenvalue $\lambda$. The reverse direction swaps $\X$ and $\X^\top$. The map $\bm{v} \mapsto \X\bm{v}$ is one-to-one between the eigenspaces (eigenvectors of distinct eigenvalues never mix), so \textbf{the nonzero eigenvalues and their multiplicities are exactly the same}; the counts of zero eigenvalues are respectively $d - r$ and $n - r$ ($r = \rank(\X)$) and may differ.
+
+Since GD's decay factor $1 - \eta\lambda_j$ acts only on the nonzero spectrum, the convergence-rate formulas of the two regimes depend only on the $r$ eigenvalues that $\X^\top\X$ and $\X\X^\top$ share --- the algebraic reason the ``$d$ formulas'' and the ``$n$ formulas'' are interchangeable: the effective dimension is $r$ in both cases. $\square$
+\end{description}
+
+\subsection{Chapter 6: From Estimation to Inference}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:block-inv} (the block-inversion trilogy)]
+Write $\bm{\Sigma} = \begin{pmatrix} s & \bm{c}^\top \\ \bm{c} & \bm{S} \end{pmatrix}$ ($s = \Sigma_{yy}$, $\bm{c} = \bm{\Sigma}_{Xy}$, $\bm{S} = \bm{\Sigma}_{XX}$, with the relevant inverses assumed to exist).
+
+\textbf{(i) Conditional distribution.} Apply the linear transformation $y \mapsto y - \bm{c}^\top\bm{S}^{-1}\x$ to the joint Gaussian to eliminate the cross term; this immediately gives
+\[
+  y \mid \X \sim \mathcal{N}\big( \bm{c}^\top\bm{S}^{-1}\x,\ s - \bm{c}^\top\bm{S}^{-1}\bm{c} \big).
+\]
+
+\textbf{(ii) Precision blocks.} Expand $\bm{\Theta}\bm{\Sigma} = \bm{I}$ blockwise into four equations, or use the Schur-complement inversion formula:
+\[
+  \Theta_{yy} = \frac{1}{s - \bm{c}^\top\bm{S}^{-1}\bm{c}}, \qquad
+  \bm{\Theta}_{Xy} = -\bm{S}^{-1}\bm{c}\,\Theta_{yy}.
+\]
+Comparing with (i) gives \eqref{eq:beta-theta}: $\bbeta = \bm{S}^{-1}\bm{c} = -\bm{\Theta}_{Xy}/\Theta_{yy}$, $\Var(\varepsilon) = s - \bm{c}^\top\bm{S}^{-1}\bm{c} = 1/\Theta_{yy}$.
+
+\textbf{(iii) Partial correlation.} Apply the same block decomposition to $\bm{\Theta}$ itself (fix indices $i, j$, treat the rest as one block); the correlation of the two-dimensional Schur complement of $i,j$ is the partial correlation:
+$\rho_{ij\cdot V\setminus\{i,j\}} = -\Theta_{ij}/\sqrt{\Theta_{ii}\Theta_{jj}}$.
+In particular $\Theta_{ij} = 0$ if and only if this partial correlation vanishes, and by the argument of (ii) repeated for variable $i$ instead of $y$, this is equivalent to $i \perp j \mid$ the rest. $\square$
+
+\item[Exercise \ref{ex:debiased} (error decomposition of the debiased estimator)]
+From the model $\y = \X\bbeta + \bm{\varepsilon}$, the residual is $\y - \X\widehat{\bbeta}_{\mathrm{lasso}} = \X(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}) + \bm{\varepsilon}$. Substitute into \eqref{eq:debiased} and use $\bm{S} = \X^\top\X/n$:
+\begin{align*}
+  \widetilde{\bbeta}
+  &= \widehat{\bbeta}_{\mathrm{lasso}} + \tfrac{1}{n}\widehat{\bm{\Theta}}\X^\top\bm{\varepsilon} + \widehat{\bm{\Theta}}\bm{S}\big(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}\big) \\
+  &= \bbeta + \underbrace{\tfrac{1}{n}\widehat{\bm{\Theta}}\X^\top\bm{\varepsilon}}_{\text{noise (variance)}} + \underbrace{\big(\widehat{\bm{\Theta}}\bm{S} - \bm{I}\big)\big(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}\big)}_{\text{remainder (bias)}},
+\end{align*}
+where the second step uses the identity split $\widehat{\bbeta}_{\mathrm{lasso}} = \bbeta - (\bbeta - \widehat{\bbeta}_{\mathrm{lasso}})$.
+
+\textbf{Why the first term is ``variance.''} It is a mean-zero independent sum $\frac{1}{n}\sum_i \widehat{\bm{\Theta}}\x_i\,\varepsilon_i$; conditional on $\X$ (hence on $\widehat{\bm{\Theta}}$), each term has variance $\frac{\sigma^2}{n}\cdot\frac{1}{n}\widehat{\bm{\Theta}}\X^\top\X\widehat{\bm{\Theta}}^\top \approx \frac{\sigma^2}{n}\,\bm{\Theta}\bm{\Sigma}\bm{\Theta}$ (using $\widehat{\bm{\Theta}}\bm{S} \approx \bm{I}$), and the central limit theorem gives the asymptotic normality \eqref{eq:asym-norm}. It \textit{derives purely from noise}, regardless of how far $\widehat{\bbeta}_{\mathrm{lasso}}$ is from $\bbeta$.
+
+\textbf{Why the second term is ``bias.''} Written componentwise: the absolute value of the $j$-th component is at most $\norm{\widehat{\bm{\Theta}}\bm{S} - \bm{I}}_{\max} \cdot \norm{\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}}_1$. The nodewise-lasso or CLIME construction guarantees $\norm{\widehat{\bm{\Theta}}\bm{S}}_{\max} = O_p(\lambda_n)$ with $\lambda_n \asymp \sqrt{\log d / n}$; the lasso $\ell_1$ error under $s$-sparsity satisfies $\norm{\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}}_1 = O_p(s\lambda_n)$. The product is $O_p(s\lambda_n^2) = O_p\big(s\log d / n\big) = o_p(n^{-1/2})$ (when $s\log d = o(\sqrt{n})$). Hence the bias term is an order of magnitude smaller than the noise term, and asymptotic normality follows --- the essence of debiasing is that $\widehat{\bm{\Theta}}$ ``projects out'' the shrinkage bias. $\square$
+
+\item[Exercise \ref{ex:glasso-clime} (points for discussion)]
+The optimality condition of graphical lasso, $\bm{S} - \bm{\Theta}^{-1} + \lambda\bm{\Gamma} = \zero$, is \textit{nonlinear} in $\bm{\Theta}$ (it contains $\bm{\Theta}^{-1}$), and the whole iteration must stay inside the cone $\bm{\Theta} \succ \zero$; when $d \gg n$ and $\bm{S}$ is highly ill-conditioned, floating-point evaluation of $\bm{\Theta}^{-1}$ \textbf{amplifies the ill-conditioning of $\bm{S}$ quadratically}, worsening the condition number of the optimization problem. CLIME rewrites ``$\bm{\Theta}$ is the inverse of $\bm{S}$'' as the linear constraint $\bm{S}\bm{\Theta} - \bm{I} \approx \zero$: the ill-conditioning enters only through one matrix multiplication, and geometrically the problem is a linear program over a polytope --- better conditioned, no PD constraint, no $\log\det$ differentiation. Practical benefits of CLIME's per-column LP structure: ($i$) the $d$ columns are fully independent, embarrassingly parallel; ($ii$) each column is a standard LP callable from any mature solver, with no need to implement glasso's block coordinate descent; ($iii$) it allows scenarios where $\bm{\Sigma}$ itself is not sparse and only $\bm{\Theta}$ is (likelihood-based methods have a more tortuous efficiency theory there). The cost: CLIME discards the statistical efficiency of the likelihood and is often slightly more conservative than glasso in finite samples. $\square$
+\end{description}
+
+\subsection{Chapter 7: Inference at Scale and FDR Control}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:bh-hand} (BH by hand)]
+The threshold is $qk/m = 0.02\,k$: $k=1{:}\ 0.02$ ($0.001 \le 0.02$, pass); $k=2{:}\ 0.04$ ($0.02 \le 0.04$, pass); $k=3{:}\ 0.06$ ($0.04 \le 0.06$, pass); $k=4{:}\ 0.08$ ($0.09 > 0.08$, fail); $k=5{:}\ 0.10$ ($0.3 > 0.10$, fail). Hence $\hat{k} = 3$, and BH rejects $\{1, 2, 3\}$.
+
+Three-way comparison: the Bonferroni threshold $q/m = 0.02$ rejects only $\{1\}$ --- it misses two discoveries that could have been made; testing one by one (at level $q=0.1$) rejects $\{1,2,3,4\}$ --- the fourth hypothesis, with $p=0.09$, is rejected with no protection, even though it is very likely a null (with $m=5$, the probability of seeing $p \le 0.1$ under all-null is about $40\%$). BH sits exactly in between: two more discoveries than Bonferroni, one less risk than the naked test. Note that $0.09 < q$ yet it is \textit{not} rejected by BH --- \textbf{BH is not ``per-hypothesis testing with $\alpha$ replaced by $qk/m$''; the slanted line has already tightened beyond the 4-th $p$-value}. $\square$
+
+\item[Exercise \ref{ex:bh-bonf} (FDR vs.\ FWER; the inclusion between the two procedures)]
+\textbf{(a)} Examine the ratio sample-path by sample-path: if $V = 0$, then $V/\max(R,1) = 0$; if $V \ge 1$, then $V/\max(R,1) \le 1 = \ind{V \ge 1}$. Taking expectations,
+\[
+  \mathrm{FDR} = \E\Big[\frac{V}{\max(R,1)}\Big] \le \E\big[\ind{V \ge 1}\big] = \Prob(V \ge 1) = \mathrm{FWER}.
+\]
+So any procedure with FWER controlled at $\alpha$ (Bonferroni, Holm, \dots) automatically satisfies $\mathrm{FDR} \le \alpha$ --- usually far too conservatively.
+
+\textbf{(b)} Bonferroni (at level $q$) rejects $\{ j : p_j \le q/m \}$. Suppose some $p_j = p_{(i)}$ lies in this set; then $p_{(i)} \le q/m \le q i/m$ (since $i \ge 1$), i.e., $i$ satisfies the crossing condition \eqref{eq:bh}, so $i \le \hat{k}$ and the $i$-th hypothesis is also rejected by BH. Hence the Bonferroni rejection set $\subseteq$ the BH rejection set, a strict subset whenever $\hat{k} \ge 2$.
+
+\textbf{(c)} Bonferroni's per-test threshold: two-sided $q/m = 5\times 10^{-7}$, corresponding to $|z| > z_{1-2.5\times10^{-7}} \approx 5.17$. The power of a single signal ($z_j \sim \mathcal{N}(5,1)$) is
+\[
+  \Prob(|z_j| > 5.17) = \Phi(5 - 5.17) + \Phi(-5 - 5.17) \approx \Phi(-0.17) \approx 0.43 .
+\]
+About $200 \times 0.43 \approx 86$ expected rejections --- power crushed to four tenths, collapsing further as $m$ grows at fixed signal strength.
+
+BH: the signals' $p$-values concentrate near $2\Phi(-5) \approx 5.7\times 10^{-7}$, three orders of magnitude below the threshold. Take $\hat{k} \approx 210$ (200 signals + about 10 null $p$-values mixed in); the threshold $q\hat{k}/m = 0.05 \times 210 / 10^5 \approx 1.05 \times 10^{-4}$ is $\hat{k} \approx 210$ times the Bonferroni threshold; all signals pass and power $\to 1$. Verify the false discovery proportion: of about $210$ rejections, about $10$ are false, $10/210 \approx 4.8\% \le q = 5\%$ --- consistent with Theorem~\ref{thm:bh}. $\square$
+
+\item[Exercise \ref{ex:bh-proof} (induction proof of $\mathrm{FDR} \le q$ under the all-null independent case)]
+Let $P_m(q) = \Prob\big( \exists k \le m : p_{(k)} \le qk/m \big)$ with $p_j$ iid $U(0,1)$. \textbf{Base case} $m=1$: $P_1(q) = \Prob(p_1 \le q) = q$.
+
+\textbf{Inductive step}: assume the claim for $m-1$. Condition on the maximum $U := p_{(m)}$, whose density is $m u^{m-1}$, splitting into two branches.
+
+\textit{Branch one: $U \le q$.} Then $k=m$ automatically satisfies the crossing condition ($U \le q = qm/m$), the event holds with probability one, contributing
+\[
+  \int_0^q 1 \cdot m u^{m-1}\, du = q^{m}.
+\]
+
+\textit{Branch two: $U = u > q$.} Key fact: conditional on $U = u$, the remaining $m-1$ variables are iid $U(0, u)$, i.e., $p_{(k)} = u\, q_{(k)}$ ($k < m$), where $q_{(k)}$ are the order statistics of $m-1$ uniforms. Hence
+\[
+  p_{(k)} \le \frac{qk}{m}
+  \iff q_{(k)} \le \frac{q k}{m u}
+  = \frac{q'\, k}{m-1},
+  \qquad q' := \frac{q(m-1)}{m u}.
+\]
+By the inductive hypothesis (applied to $m-1$ iid uniforms at level $q'$; the conclusion is trivial when $q' > 1$), the conditional probability in this branch is $\le q' = q(m-1)/(mu)$, contributing
+\[
+  \int_q^1 \frac{q(m-1)}{m u}\, m u^{m-1}\, du
+  = q(m-1) \int_q^1 u^{m-2}\, du
+  = q\,(1 - q^{m-1}).
+\]
+
+\textbf{Combining}: $P_m(q) \le q^m + q(1 - q^{m-1}) = q$. Induction complete. $\square$
+
+(Note: the general case $m_0 < m$ uses conditioning on the non-null $p$-values plus the technique of positive regression dependence (PRDS) to reduce to the all-null case; the original Benjamini--Hochberg paper and Benjamini--Yekutieli (2001) give the full argument.)
+
+\item[Exercise \ref{ex:knockoff} (the exchangeability argument)]
+\textbf{(a)} Let the augmented design be $\bm{A} = [\X\ \tilde{\X}] \in \R^{n \times 2d}$. The defining construction property of knockoffs is exactly: for any $j$, swapping column $j$ with column $d+j$ of $\bm{A}$ leaves the joint distribution of $\bm{A}$ unchanged. Under $H_{0j}$, $\y$ does not depend on $\x_j$ ($\y \perp \x_j \mid \x_{-j}$), so the swap does not change the joint distribution of $(\bm{A}, \y)$, and hence does not change the distribution of any statistic computed from them. The idealized importance statistic satisfies \textbf{swap equivariance}: under the swap, $(Z_j, \tilde{Z}_j) \to (\tilde{Z}_j, Z_j)$ with all other components fixed, and therefore
+\[
+  (W_1, \dots, W_j, \dots, W_m)
+  = (W_1, \dots, -\!W_j, \dots, W_m) \ \text{in distribution}.
+\]
+Marginalizing out the other coordinates gives $W_j \overset{d}{=} -W_j$. This is \eqref{eq:knockoff-sym}. \textit{An honest note}: in actual statistics, the other $W_i$ also shift slightly because the shadow $\tilde{\x}_j$ participates in the fit; the rigorous argument needs the pair ``exchangeability of the augmented design $+$ equivariance of the statistic under swaps'' (the sign-flip property of Barber--Cand\`es 2015), and the conclusion is unchanged: under the nulls, the signs of the entire vector $W$ can be flipped arbitrarily.
+
+\textbf{(b)} The \textbf{discoveries} above a threshold $t$ are $\{j : W_j \ge t\}$, with count $R(t) = \#\{j : W_j \ge t\}$. The number of false discoveries (those with $H_{0j}$ true) $V(t)$ is unobservable, but by (a), each false discovery has $W_j$ positive with probability $1/2$ and negative with probability $1/2$, independently of $|W_j|$ (by symmetry). Hence
+\[
+  \E\big[ \#\{ j \text{ null} : W_j \le -t \} \big]
+  = \E\big[ \#\{ j \text{ null} : W_j \ge t \} \big]
+  = \E\, V(t),
+\]
+i.e., the \textbf{observable count} on the left (contaminated by a few negative $W$'s of signal variables, which only makes it larger and more conservative) estimates $\E V(t)$. The knockoff+ threshold \eqref{eq:knockoff} requires $\big(1 + \#\{W_j \le -t\}\big) / \#\{W_j \ge t\} \le q$: the denominator is $R(t)$, the numerator is $\widehat{V(t)} + 1$ (the $+1$ counters the overdispersion of the numerator). Thus every candidate threshold satisfies $\widehat{V(t)}/R(t) \le q$, and taking expectations over the random ordering (the technical part of the knockoff theorem is dressing this ``ratio estimator'' in a martingale argument) yields $\mathrm{FDR} \le q$. The intuition in one sentence: \textbf{the shadow variables are symmetric mirrors of the real ones, and the count of negative $W$'s is the reflection of the fakes mixed in}. $\square$
+\end{description}
+
+\subsection{Chapter 8: Nonlinear Latent Spaces}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:kernel-dual} (primal form $=$ dual form of kernel ridge regression)]
+Primal-form prediction: $\hat{f}(\tilde{\bm{z}}) = \phi(\tilde{\bm{z}})^\top(\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d)^{-1}\bm{\Phi}^\top\y$. Apply the push-through identity \eqref{eq:push-through} to $(\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d)^{-1}\bm{\Phi}^\top$ (with $\X$ there replaced by $\bm{\Phi}$):
+\[
+  \hat{f}(\tilde{\bm{z}})
+  = \phi(\tilde{\bm{z}})^\top\bm{\Phi}^\top(\bm{K} + \lambda\bm{I}_n)^{-1}\y
+  = \bm{k}(\tilde{\bm{z}})^\top(\bm{K} + \lambda\bm{I}_n)^{-1}\y ,
+\]
+which is exactly the dual form \eqref{eq:kernel-ridge} --- the two give \textbf{exactly the same} prediction function pointwise.
+
+\textbf{Rank assumptions.} When $\lambda > 0$, all eigenvalues of $\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d$ and $\bm{K} + \lambda\bm{I}_n$ are $\ge \lambda > 0$, regardless of the rank of $\bm{\Phi}$ --- this is precisely the mechanism by which ridge regularization ``incidentally'' completes the kernelization: both inverses always exist. $\square$
+
+\item[Exercise \ref{ex:kernel-interp} (positive-definiteness of the Gaussian kernel and the interpolation equation)]
+\textbf{Strict positive-definiteness.} The Fourier transform of the Gaussian kernel $k(\bm{z},\bm{z}') = \exp(-\norm{\bm{z}-\bm{z}'}^2/2\sigma^2)$ is a positive function (supported on the whole frequency space, no spectral gap). Suppose $\sum_i a_i k(\bm{z},\bm{z}_i) \equiv 0$: the left side is a linear combination of $n$ distinct Gaussian functions, hence an analytic function; a Fourier-support argument (or the identity theorem for analytic functions) forces all $a_i = 0$. Hence $\{k(\cdot,\bm{z}_i)\}_{i=1}^n$ are linearly independent in the RKHS, their Gram matrix $\bm{K}$ is \textbf{positive definite and invertible}, and \eqref{eq:kernel-interp} is well defined.
+
+\textbf{The interpolation equation.} By definition $\bm{\alpha} = \bm{K}^{-1}\y$, so $\bm{K}\bm{\alpha} = \y$. Verify interpolation: at a training point $\bm{z}_j$, $\bm{k}(\bm{z}_j)$ is the $j$-th \textit{row} of $\bm{K}$, so
+\[
+  \hat{f}(\bm{z}_j) = \bm{k}(\bm{z}_j)^\top\bm{K}^{-1}\y = (\bm{K}\bm{e}_j)^\top\bm{K}^{-1}\y = y_j .
+\]
+Correspondence: this is the kernel-language translation of $\X\widehat{\bbeta}' = \y$ from Chapter~\ref{sec:gd-underdet} --- feature-space interpolation $\phi(\bm{z}_j)^\top\widehat{\bbeta}' = y_j$, after inner-product-ization, becomes $\bm{K}\bm{\alpha} = \y$; the ``coefficients $\widehat{\bbeta}'$'' and the ``kernel weights $\bm{\alpha}$'' are linked by $\widehat{\bbeta}' = \bm{\Phi}^\top\bm{\alpha}$ (the representer form). $\square$
+
+\item[Exercise \ref{ex:ntk} (explicit form of the two-layer NTK)]
+Write $u = \bm{\omega}^\top\bm{z} + b$, $u' = \bm{\omega}^\top\bm{z}' + b$ (with $\bm{\omega}, b$ drawn from the initialization distribution of Section~\ref{sec:ntk}). For $f(\bm{z}) = \frac{1}{\sqrt{D}}\sum_{j=1}^D a_j\,\sigma(\bm{\omega}_j^\top\bm{z} + b_j)$ from \eqref{eq:two-layer}, differentiate with respect to the two kinds of parameters:
+\[
+  \frac{\partial f}{\partial a_j} = \frac{1}{\sqrt{D}}\sigma(\bm{\omega}_j^\top\bm{z} + b_j),
+  \qquad
+  \nabla_{(\bm{\omega}_j, b_j)} f = \frac{a_j}{\sqrt{D}}\,\sigma'(\bm{\omega}_j^\top\bm{z} + b_j)\,(\bm{z}^\top, 1)^\top .
+\]
+The parameter inner product (under the $1/D$ scaling convention) splits into the sum of the two layers' contributions:
+\[
+  \Theta^{(D)}(\bm{z},\bm{z}')
+  = \frac{1}{D}\sum_{j=1}^D \Big[\sigma(u_j)\sigma(u_j') + a_j^2\,\sigma'(u_j)\sigma'(u_j')\,(\bm{z}^\top\bm{z}' + 1)\Big] .
+\]
+As $D \to \infty$, the initialized parameters $a_j, \bm{\omega}_j, b_j$ are i.i.d., and the law of large numbers gives pointwise convergence to the expectation:
+\[
+  \Theta(\bm{z},\bm{z}') = \E\big[\sigma(u)\sigma(u')\big] + \E\big[a^2\big]\cdot\E\big[\sigma'(u)\sigma'(u')\big]\cdot(\bm{z}^\top\bm{z}' + 1).
+\]
+Under the standard initialization $\E[a^2] = 1$ this is
+\[
+  \Theta(\bm{z},\bm{z}') = \underbrace{\E\big[\sigma(u)\sigma(u')\big]}_{\text{output-layer contribution (= RF kernel)}} + (\bm{z}^\top\bm{z}' + 1)\,\E\big[\sigma'(u)\sigma'(u')\big] .
+\]
+Two remarks: if the \textbf{biases are fixed} and not trained, the second term degenerates to $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$ (the form stated in the exercise uses this convention); if the biases are trained together with the other first-layer parameters, the inner product picks up an additional $1 \times 1$, i.e., $\bm{z}^\top\bm{z}' + 1$ --- this solution adopts the latter.
+
+\textbf{Comparison with the RF kernel.} The RF kernel $k_{\mathrm{RF}}(\bm{z},\bm{z}') = \E[\sigma(u)\sigma(u')]$ contains only the output-layer contribution; the NTK has an extra derivative term, which at $\bm{z} = \bm{z}'$ satisfies $\E[\sigma'(u)^2] > 0$ and is strictly positive --- hence $\Theta \succeq k_{\mathrm{RF}}$ (as kernel matrices), strictly stronger than the RF kernel. $\square$
+
+\textbf{Explicit half-space formulas for ReLU.} Take $(\bm{\omega}, b)$ with independent standard normal components (equivalently, $(\omega_1,\dots,\omega_p,b)$ isotropic), and write $\varphi = \arccos\!\big(\bm{z}^\top\bm{z}' / (\norm{\bm{z}}\,\norm{\bm{z}'})\big)$ (ReLU networks are insensitive to constant shifts, so set $\norm{\bm{z}} = \norm{\bm{z}'} = 1$); then
+\[
+  \E\big[\relu(u)\relu(u')\big] = \frac{1}{2\pi}\big(\sin\varphi + (\pi - \varphi)\cos\varphi\big),
+\]
+\[
+  \E\big[\sigma'(u)\sigma'(u')\big] = \E\big[\ind{u > 0}\ind{u' > 0}\big] = \frac{\pi - \varphi}{2\pi}.
+\]
+The latter is the angle measure of the intersection of two half-spaces, the former the classical half-space moment formula of Cho \& Saul (2009). Substituting back gives the explicit NTK of a two-layer ReLU network. $\square$
+\end{description}
+
+\subsection{Chapter 9: Epilogue}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[Exercise \ref{ex:orth-ridge} (optimal shrinkage under an orthogonal design)]
+When $\X^\top\X = n\bm{I}$, the OLS coordinates are independent, $\hat\beta_j \sim \mathcal{N}(\beta_j, \sigma^2/n)$, and the ridge solution shrinks coordinatewise:
+\[
+  \hat\beta_j^{\mathrm{ridge}} = \frac{n}{n+\lambda}\,\hat\beta_j
+  \quad\Longrightarrow\quad
+  \MSE(\lambda) = \underbrace{\Big(\frac{\lambda}{n+\lambda}\Big)^2 \beta_j^2}_{\text{bias}^2} + \underbrace{\frac{\sigma^2 n}{(n+\lambda)^2}}_{\text{variance}} .
+\]
+Differentiate with respect to $\lambda$ and set to zero:
+\[
+  \frac{d}{d\lambda}\,\frac{\lambda^2\beta_j^2 + \sigma^2 n}{(n+\lambda)^2} = 0
+  \;\Longleftrightarrow\;
+  \lambda\,\beta_j^2\,(n+\lambda) = \lambda^2\beta_j^2 + \sigma^2 n
+  \;\Longleftrightarrow\;
+  \boxed{\ \lambda^\star = \frac{\sigma^2}{\beta_j^2}\ } .
+\]
+(When $\beta_j = 0$ the bias term is identically zero and the variance increases with $\lambda$, so the optimum is $\lambda^\star = \infty$ --- shrink the coefficient all the way to $0$. Hence $\lambda^\star > 0$ if and only if $\beta_j \neq 0$.)
+
+\textbf{The precise meaning of ``weak signal.''} Measure the signal in noise units $\sigma/\sqrt{n}$: $|\beta_j| \le \sigma/\sqrt{n}$ (signal-to-noise ratio at most $1$) if and only if $\lambda^\star = \sigma^2/\beta_j^2 \ge n$, i.e., the shrinkage factor $n/(n+\lambda^\star) \le \tfrac12$ --- \textit{the definition of a weak signal is ``the optimal shrinkage cuts at least half of it''}.
+
+\textbf{The gain from shrinkage.} Substituting $\lambda^\star$ directly:
+\[
+  \MSE(\lambda^\star) = \frac{\sigma^2\beta_j^2}{\sigma^2 + n\beta_j^2}, \qquad
+  \frac{\MSE(\lambda^\star)}{\MSE(0)} = \frac{n\beta_j^2}{\sigma^2 + n\beta_j^2} < 1 \ (\beta_j \neq 0).
+\]
+The ratio tends to $0$ as $|\beta_j| \to 0$: the weaker the signal, the closer the gain of optimal shrinkage gets to $100\%$; and it tends to $1$ as $|\beta_j| \to \infty$ --- \textbf{for strong signals the optimal amount of shrinkage tends to zero ($\lambda^\star \to 0$), and shrinkage automatically degenerates into no shrinkage}. This is the quantitative form, under orthogonal design, of ``shrinkage never hurts a strong signal and always helps a weak one.'' $\square$
+\end{description}

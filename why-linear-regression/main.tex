@@ -1,11 +1,14 @@
 % !TEX program = xelatex
-% Why Linear Regression — a tutorial
-% Author: 熊昊一 (Haoyi Xiong)
+% Why (we still need) linear regression -- a deep-dive for applied and data scientists (English edition)
+% Authors: Haoyi Xiong (熊昊一), Lingkai Kong (孔令凯)
 \documentclass[11pt, a4paper]{ctexart}
 
-% ---------- Encoding & fonts ----------
+% ---------- CJK fonts (kept for the author names) ----------
 \usepackage{xeCJK}
-\setCJKmainfont{PingFang SC}  % macOS built-in; fallback: STSong / Source Han Serif
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+
+% ---------- Math ----------
 \usepackage{amsmath, amssymb, amsthm, mathtools}
 \usepackage{bm}
 \usepackage{geometry}
@@ -22,18 +25,18 @@
 \tcbuselibrary{breakable, skins}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, calc, positioning, decorations.pathreplacing}
+\usetikzlibrary{arrows.meta, calc, positioning}
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
   linkcolor=accent,
   citecolor=accent,
   urlcolor=accent,
-  pdftitle={Why Linear Regression},
-  pdfauthor={Haoyi Xiong},
+  pdftitle={Why (we still need) linear regression -- a deep-dive for applied and data scientists},
+  pdfauthor={Haoyi Xiong, Lingkai Kong},
 }
 
-% ---------- Theorem-like environments ----------
+% ---------- Theorem environments (English names) ----------
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -46,32 +49,35 @@
 \newtheorem*{remark}{Remark}
 \newtheorem*{intuition}{Intuition}
 
-% ---------- Boxes ----------
+% ---------- Emphasis boxes ----------
 \newtcolorbox{keybox}[1][]{
   colback=lightband, colframe=accent, fonttitle=\bfseries,
   title={#1}, breakable, sharp corners, boxrule=0.6pt, left=2mm, right=2mm, top=1.5mm, bottom=1.5mm
 }
 
-% ---------- Macros ----------
+% ---------- Common macros ----------
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\Cov}{\mathrm{Cov}}
-\newcommand{\bias}{\mathrm{bias}}
-\newcommand{\MSE}{\mathrm{MSE}}
 \newcommand{\rank}{\mathrm{rank}}
 \newcommand{\trace}{\mathrm{tr}}
+\newcommand{\MSE}{\mathrm{MSE}}
 \newcommand{\X}{\mathbf{X}}
 \newcommand{\y}{\mathbf{y}}
-\newcommand{\bhat}{\hat{\bm{\beta}}}
+\newcommand{\bhat}{\widehat{\bm{\beta}}}
 \newcommand{\bbeta}{\bm{\beta}}
 \newcommand{\x}{\mathbf{x}}
 \newcommand{\zero}{\mathbf{0}}
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\relu}[1]{\mathrm{ReLU}\!\left(#1\right)}
+\newcommand{\ind}[1]{\mathbf{1}\!\left\{#1\right\}}
 
-\title{\Huge \textbf{Why Linear Regression}\\[4pt]
-\Large A First Principles Tutorial}
-\author{熊昊一 (Haoyi Xiong)}
+\title{\Huge \textbf{Why (we still need) linear regression}\\[6pt]
+\Large a deep-dive for applied and data scientists\\[10pt]
+\large 为什么（依然）需要线性回归 --- 写给应用与数据科学家的深度教程}
+\author{Haoyi Xiong (熊昊一) \and Lingkai Kong (孔令凯)}
 \date{\today}
 
 \begin{document}
@@ -80,29 +86,235 @@
 
 \begin{abstract}
 \noindent
-Linear regression is the first model almost everyone learns and the model almost everyone underestimates.
-This tutorial is not about \emph{how} to run \texttt{lm()} in R or \texttt{LinearRegression()} in scikit-learn — it is about \emph{why} the method works, why squared error, why the normal equations, and why, after two centuries, a straight line is still where honest data analysis begins.
-We derive everything from first principles: the calculus of least squares, the geometry of projections, the Gauss--Markov theorem, the probabilistic view through maximum likelihood, and the modern view through bias--variance trade-off and regularization.
-Only high-school calculus and basic linear algebra are assumed.
+Linear regression is the first model everyone learns and the one almost everyone underestimates.
+This tutorial is not about running \texttt{lm()} in R or tuning \texttt{LinearRegression()} in scikit-learn --- it answers \textit{why} the method works: why squared error, why the normal equations, why the correlation coefficient appears inside a regression coefficient, why a straight line can measure \textit{correlation} yet cannot assert \textit{causation}, and why, more than two hundred years later, the $d$-dimensional hyperplane formula
+$\widehat{\bm{\beta}} = (\X^\top \X)^{-1} \X^\top \y$
+is still the most honest starting point of data analysis.
+The only prerequisites are high-school calculus and basic linear algebra; every claim is derived from scratch, and all historical references are verifiable.
 \end{abstract}
 
 \newpage
 \tableofcontents
 \newpage
 
-\input{chapters/01_intro}
-\input{chapters/02_least_squares}
-\input{chapters/03_why_squared}
-\input{chapters/04_geometry}
-\input{chapters/05_gauss_markov}
-\input{chapters/06_probability}
-\input{chapters/07_bias_variance}
-\input{chapters/08_beyond}
-\input{chapters/09_practice}
-\input{chapters/10_epilogue}
+\input{chapters/00_preface}
 
-\appendix
-\input{chapters/a1_linear_algebra}
-\input{chapters/a2_exercises}
+\clearpage
+\input{chapters/01_intro}
+\clearpage
+\input{chapters/02_onedim}
+\clearpage
+\input{chapters/03_highdim}
+\clearpage
+\input{chapters/04_gd}
+\clearpage
+\input{chapters/05_gd2}
+\clearpage
+\input{chapters/06_ggm}
+\clearpage
+\input{chapters/07_fdr}
+\clearpage
+\input{chapters/08_kernel}
+\clearpage
+\input{chapters/09_epilogue}
+\clearpage
+\input{chapters/10_solutions}
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}\small
+
+\bibitem{legendre1805}
+A.-M.~Legendre.
+\newblock \emph{Nouvelles m\'ethodes pour la d\'etermination des orbites des com\`etes}.
+\newblock Firmin Didot, Paris, 1805. (First published account of least squares, in the appendix ``Sur la M\'ethode des moindres quarr\'es.'')
+\newblock \url{https://arxiv.org/abs/2104.12647} (historical survey and bibliography).
+
+\bibitem{gauss1809}
+C.~F.~Gauss.
+\newblock \emph{Theoria Motus Corporum Coelestium in Sectionibus Conicis Solem Ambientium}.
+\newblock 1809. (Probabilistic derivation of least squares; Gauss claimed use of the method since 1795, sparking the priority dispute with Legendre.)
+\newblock \url{https://arxiv.org/html/2510.17433v1} (survey of the history of astronomical inference, including the Ceres orbit prediction).
+
+\bibitem{gauss1823}
+C.~F.~Gauss.
+\newblock \emph{Theoria Combinationis Observationum Erroribus Minimis Obnoxiae}.
+\newblock 1823. (Proved the optimality of least squares under zero-mean, uncorrelated, equal-variance errors --- the theorem later known as Gauss--Markov; Markov independently gave a formal statement in 1912.)
+\newblock \url{https://en.onul.works/w/Carl_Friedrich_Gauss} (survey including the 1823 work and the history of the theorem).
+
+\bibitem{galton1886}
+F.~Galton.
+\newblock Regression towards mediocrity in hereditary stature.
+\newblock \emph{Journal of the Anthropological Institute of Great Britain and Ireland}, 15:246--263, 1886. (Origin of the word ``regression''; the regression equation of child height on mid-parent height is approximately $y = 0.516\,x + 33.73$, a slope below one in standard-deviation units.)
+\newblock \url{https://arxiv.org/html/2512.04747v1} (exposition of the original equation and figures).
+
+\bibitem{pearson1896}
+K.~Pearson.
+\newblock Mathematical contributions to the theory of evolution. III. Regression, heredity and panmixia.
+\newblock \emph{Philosophical Transactions of the Royal Society A}, 187:253--318, 1896.
+\newblock \url{https://doi.org/10.1098/rsta.1896.0007} (formal foundation of the correlation coefficient and least-squares regression).
+
+\bibitem{wright1921}
+S.~Wright.
+\newblock Correlation and causation.
+\newblock \emph{Journal of Agricultural Research}, 20:557--585, 1921. (Founding paper of path analysis: correlations decompose into sums of products of path coefficients, but the causal structure must come from outside statistics.)
+\newblock \url{https://arxiv.org/pdf/1910.08750} (bibliographic entry in a causal-inference survey).
+
+\bibitem{reichenbach1956}
+H.~Reichenbach.
+\newblock \emph{The Direction of Time}.
+\newblock University of California Press, 1956. (Common-cause principle: if events $A$, $B$ are statistically correlated, then either $A$ causes $B$, or $B$ causes $A$, or there is a common cause $C$.)
+\newblock \url{https://ndpr.nd.edu/reviews/the-principle-of-common-cause/} (philosophical review of the principle).
+
+\bibitem{penrose1955}
+R.~Penrose.
+\newblock A generalized inverse for matrices.
+\newblock \emph{Mathematical Proceedings of the Cambridge Philosophical Society}, 51(3):406--413, 1955. (The Moore--Penrose pseudoinverse.)
+\newblock \url{https://www.nowpublishers.com/article/DownloadSummary/MAL-057} (bibliographic entry).
+
+\bibitem{hoerl1970}
+A.~E.~Hoerl and R.~W.~Kennard.
+\newblock Ridge regression: Biased estimation for nonorthogonal problems.
+\newblock \emph{Technometrics}, 12(1):55--67, 1970.
+\newblock \url{https://doi.org/10.1080/00401706.1970.10488634}.
+
+\bibitem{tibshirani1996}
+R.~Tibshirani.
+\newblock Regression shrinkage and selection via the lasso.
+\newblock \emph{Journal of the Royal Statistical Society: Series B}, 58(1):267--288, 1996.
+\newblock \url{https://doi.org/10.1111/j.2517-6161.1996.tb02080.x}.
+
+\bibitem{stigler1986}
+S.~M.~Stigler.
+\newblock \emph{The History of Statistics: The Measurement of Uncertainty before 1900}.
+\newblock Harvard University Press, 1986. (The authoritative account of the history of least squares, correlation, and regression.)
+
+\bibitem{scholkopf2002}
+B.~Sch\"olkopf and A.~J.~Smola.
+\newblock \emph{Learning with Kernels: Support Vector Machines, Regularization, Optimization, and Beyond}.
+\newblock MIT Press, 2002. (Standard reference on kernel methods, RKHS, and kernel ridge regression; the trinity of kernel $=$ feature-space inner product $=$ covariance function.)
+
+\bibitem{kimeldorf1970}
+G.~S.~Kimeldorf and G.~Wahba.
+\newblock A correspondence between Bayesian estimation on stochastic processes and smoothing by splines.
+\newblock \emph{Annals of Mathematical Statistics}, 41(2):495--502, 1970. (Source of the representer theorem: the solution of a regularized problem lies in the span of kernel sections anchored at the training points.)
+\newblock \url{https://doi.org/10.1214/aoms/1177697089}.
+
+\bibitem{rahimi2007}
+A.~Rahimi and B.~Recht.
+\newblock Random features for large-scale kernel machines.
+\newblock \emph{Advances in Neural Information Processing Systems 20}, 2007. (Random features: approximate shift-invariant kernels with an explicit finite-dimensional map, wiring kernel regression back into linear algebra.)
+\newblock \url{https://papers.nips.cc/paper/3182-random-features-for-large-scale-kernel-machines}.
+
+\bibitem{lauritzen1996}
+S.~L.~Lauritzen.
+\newblock \emph{Graphical Models}.
+\newblock Oxford University Press, 1996. (Classic source for Gaussian graphical models and ``zero entries of the precision matrix $\Leftrightarrow$ conditional independence.'')
+
+\bibitem{spirtes2000}
+P.~Spirtes, C.~Glymour, and R.~Scheines.
+\newblock \emph{Causation, Prediction, and Search}, 2nd edition.
+\newblock MIT Press, 2000. (The PC algorithm: causal discovery via conditional-independence constraints under Markov plus faithfulness.)
+
+\bibitem{meinshausen2006}
+N.~Meinshausen and P.~B\"uhlmann.
+\newblock High-dimensional graphs and variable selection with the lasso.
+\newblock \emph{Annals of Statistics}, 34(3):1436--1462, 2006. (Nodewise regression with lasso for graph structure; consistency of high-dimensional graphical-model selection.)
+\newblock \url{https://arxiv.org/pdf/1211.0811} (entry and context in a survey bibliography).
+
+\bibitem{zou2005}
+H.~Zou and T.~Hastie.
+\newblock Regularization and variable selection via the elastic net.
+\newblock \emph{Journal of the Royal Statistical Society: Series B}, 67(2):301--320, 2005. (The $\ell_1 + \ell_2$ combined penalty; selection consistency for groups of correlated variables.)
+\newblock \url{https://arxiv.org/pdf/2110.04433v2.pdf} (bibliographic entry).
+
+\bibitem{friedman2008}
+J.~Friedman, T.~Hastie, and R.~Tibshirani.
+\newblock Sparse inverse covariance estimation with the graphical lasso.
+\newblock \emph{Biostatistics}, 9(3):432--441, 2008. (Estimating the whole graph directly by $\ell_1$-penalized precision-matrix likelihood.)
+\newblock \url{https://arxiv.org/pdf/1211.0811} (entry and context in a survey bibliography).
+
+\bibitem{cai2011}
+T.~Cai, W.~Liu, and X.~Luo.
+\newblock A constrained $\ell_1$ minimization approach to sparse precision matrix estimation.
+\newblock \emph{Journal of the American Statistical Association}, 106(494):594--607, 2011. (CLIME: sparse precision-matrix estimation by constrained $\ell_1$ minimization, column-by-column linear programs.)
+\newblock \url{https://arxiv.org/pdf/1102.2233}.
+
+\bibitem{zhang2014}
+C.-H.~Zhang and S.~S.~Zhang.
+\newblock Confidence intervals for low dimensional parameters in high dimensional linear models.
+\newblock \emph{Journal of the Royal Statistical Society: Series B}, 76(1):217--242, 2014. (Debiased lasso: low-dimensional projection debiasing restoring per-coefficient asymptotic normality.)
+\newblock \url{https://doi.org/10.1111/rssb.12026}.
+
+\bibitem{vandegeer2014}
+S.~van de Geer, P.~B\"uhlmann, Y.~Ritov, and R.~Dezeure.
+\newblock On asymptotically optimal confidence regions and tests for high-dimensional models.
+\newblock \emph{Annals of Statistics}, 42(3):1166--1202, 2014. (Asymptotically optimal confidence regions and tests via the debiased lasso.)
+\newblock \url{https://arxiv.org/pdf/2208.08679v1} (bibliographic entry and context).
+
+\bibitem{bach2024}
+F.~Bach.
+\newblock \emph{Learning Theory from First Principles}.
+\newblock MIT Press, 2024. (First-principles learning theory: the modern unified view of kernel methods, implicit regularization, and overparameterization.)
+
+\bibitem{jacot2018}
+A.~Jacot, F.~Gabriel, and C.~Hongler.
+\newblock Neural tangent kernel: Convergence and generalization in neural networks.
+\newblock \emph{Advances in Neural Information Processing Systems 31}, 2018. (NTK: gradient descent in wide networks converges to a kernel gradient flow --- the ``linearized'' limit of deep networks.)
+\newblock \url{https://arxiv.org/abs/1806.07572}.
+
+\bibitem{lee2019}
+J.~Lee, L.~Xiao, S.~Schoenholz, Y.~Bahri, R.~Novak, J.~Sohl-Dickstein, and J.~Pennington.
+\newblock Wide neural networks of any depth evolve as linear models under gradient descent.
+\newblock \emph{Advances in Neural Information Processing Systems 32}, 2019. (Linearized limit of arbitrarily deep wide networks: the NTK stays constant throughout training.)
+\newblock \url{https://arxiv.org/abs/1902.06720}.
+
+\bibitem{belkin2019}
+M.~Belkin, D.~Hsu, S.~Ma, and S.~Mandal.
+\newblock Reconciling modern machine-learning practice and the classical bias--variance trade-off.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 116(32):15849--15854, 2019. (Double descent: interpolating solutions behave well in the overparameterized regime, challenging the classical bias--variance trade-off.)
+\newblock \url{https://arxiv.org/abs/1812.11118}.
+
+\bibitem{fan2020}
+J.~Fan, R.~Li, C.-H.~Zhang, and H.~Zou.
+\newblock \emph{Statistical Foundations of Data Science}.
+\newblock CRC Press, 2020. (Systematic textbook of high-dimensional statistics and data science: variable selection, sparsity, and statistics for big data.)
+
+\bibitem{wu2025}
+J.~Wu, P.~Bartlett, M.~Kakade, T.-Y.~Lee, O.~Shamir, and B.~Xie.
+\newblock Risk comparisons in linear regression: Implicit regularization dominates explicit regularization.
+\newblock 2025. (Implicit regularization of gradient descent strictly dominates ridge regularization in a minimax sense; latest arXiv version 2509.17251.)
+\newblock \url{https://arxiv.org/abs/2509.17251}.
+
+\bibitem{donoho2006}
+D.~L.~Donoho.
+\newblock Compressed sensing.
+\newblock \emph{IEEE Transactions on Information Theory}, 52(4):1289--1306, 2006. (Founding paper of compressed sensing: underdetermined systems become exactly solvable by $\ell_1$ minimization under sparsity assumptions.)
+\newblock \url{https://doi.org/10.1109/TIT.2006.871582}.
+
+\bibitem{barber2015}
+R.~F.~Barber and E.~J.~Cand\`es.
+\newblock Controlling the false discovery rate via knockoffs.
+\newblock \emph{Annals of Statistics}, 43(5):2055--2085, 2015. (Knockoffs: a variable-selection framework with finite-sample FDR control that relies on no asymptotic normality of $p$-values.)
+\newblock \url{https://arxiv.org/abs/1404.5609}.
+
+\bibitem{benjamini1995}
+Y.~Benjamini and Y.~Hochberg.
+\newblock Controlling the false discovery rate: A practical and powerful approach to multiple testing.
+\newblock \emph{Journal of the Royal Statistical Society, Series B}, 57(1):289--300, 1995. (Founding paper of FDR: the BH procedure thresholds at the crossing of ordered $p$-values with the slanted line $qk/m$.)
+\newblock \url{https://www.jstor.org/stable/2346101}.
+
+\bibitem{abramovich2006}
+F.~Abramovich, Y.~Benjamini, D.~L.~Donoho, and I.~M.~Johnstone.
+\newblock Adapting to unknown sparsity by controlling the false discovery rate.
+\newblock \emph{Annals of Statistics}, 34(2):584--653, 2006. (The BH threshold as an adaptive sparse estimator: oracle-level minimax risk rates under unknown sparsity.)
+\newblock \url{https://arxiv.org/abs/math/0505374}.
+
+\bibitem{benjamini2001}
+Y.~Benjamini and D.~Yekutieli.
+\newblock The control of the false discovery rate in multiple testing under dependency.
+\newblock \emph{Annals of Statistics}, 29(4):1165--1188, 2001. (FDR control under general dependence: the conservative correction replacing level $q$ by $q / \sum_{j=1}^m j^{-1}$.)
+\newblock \url{https://www.jstor.org/stable/2674075}.
+
+\end{thebibliography}
 
 \end{document}
