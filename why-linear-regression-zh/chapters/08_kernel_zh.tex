@@ -84,7 +84,7 @@
 
 \begin{enumerate}[label=(\arabic*)]
   \item 定义 $\phi(\bm{z}) = \tfrac{1}{\sqrt{D}}\big(\sigma(\bm{\omega}_1^\top\bm{z}+b_1), \dots, \sigma(\bm{\omega}_D^\top\bm{z}+b_D)\big)^\top$，则 $f(\bm{z};\bm{a}) = \phi(\bm{z})^\top\bm{a}$——\textbf{它就是关于 $\bm{a}$ 的线性回归}，本章全部机器（正规方程、GD 精确解、push-through、核化判据）原封不动适用。
-  \item 若 $\bm{a}$ 的初值取零且用梯度下降训练，第 \ref{sec:implicit} 章的隐式正则化分析说：它收敛到\textbf{最小范数}插值解——在 $\bm{a}$ 的 Euclidean 范数意义下。这就是\textbf{ridgeless 回归}（$\lambda \to 0^+$ 的 ridge，见练习 \ref{ex:ridge-dual}）：\textit{没有任何显式惩罚，插值解中范数最小的那个被 GD 自动选中}。
+  \item 若 $\bm{a}$ 的初值取零且用梯度下降训练，第 \ref{sec:implicit} 节的隐式正则化分析说：它收敛到\textbf{最小范数}插值解——在 $\bm{a}$ 的 Euclidean 范数意义下。这就是\textbf{ridgeless 回归}（$\lambda \to 0^+$ 的 ridge，见练习 \ref{ex:ridge-dual}）：\textit{没有任何显式惩罚，插值解中范数最小的那个被 GD 自动选中}。
 \end{enumerate}
 
 由 \eqref{eq:kernel-interp}，其预测的核形式不变，只是核函数换成了\textbf{随机特征核}
@@ -136,7 +136,7 @@ NTK 的惊人之处在于其\textbf{宽网络极限}：以 $\tfrac{1}{\sqrt{D}}$
 四个箭头分别由本章第 \ref{sec:kernel-overdet} 节（push-through）、\eqref{eq:rf-kernel}（大数定律）、第 \ref{sec:implicit} 章（隐式正则化）与 \eqref{eq:ntk-ridgeless}（NTK 不动性）支撑。\textbf{线性回归不是深度学习的特例；深度学习的宽极限是线性回归的核化}——这就是为什么两百年前的这条直线，仍然是理解今天一切模型的最诚实的起点。
 \end{keybox}
 
-两点务实的注记。其一，NTK 描述的是「lazy training」\textit{懒惰训练} regime：参数初始化尺度大、训练位移小，网络「懒得」改变内部特征——真实深度学习中特征学习（feature learning）发生时 NTK 失效，此时理论仍在建设中（Jacot 本人区分 lazy regime 与 feature-learning regime 的后续工作即为此）。其二，ridgeless 插值\textbf{非但不坏、还可能更好}：Belkin 等人的 double descent 观察表明，现代过参数模型的测试误差在插值阈值之后继续下降\cite{belkin2019}——第 \ref{sec:minnorm} 章的最小范数解正是这一现象最干净的线性化身，Jingfeng Wu 等人的工作进一步证明最优提前停止的 GD 在统计意义下支配最优 ridge（见前言与文献）\cite{wu2025}。把这两条注记与 \eqref{eq:ntk-ridgeless} 放在一起，你就拿到了「为什么过参数化网络能泛化」这个问题的、目前最诚实的线性回答。
+两点务实的注记。其一，NTK 描述的是「lazy training」\textit{懒惰训练} regime：参数初始化尺度大、训练位移小，网络「懒得」改变内部特征——真实深度学习中特征学习（feature learning）发生时 NTK 失效，此时理论仍在建设中（Jacot 本人区分 lazy regime 与 feature-learning regime 的后续工作即为此）。其二，ridgeless 插值\textbf{非但不坏、还可能更好}：Belkin 等人的 double descent 观察表明，现代过参数模型的测试误差在插值阈值之后继续下降\cite{belkin2019}——第 \ref{sec:minnorm} 节的最小范数解正是这一现象最干净的线性化身，Jingfeng Wu 等人的工作进一步证明最优提前停止的 GD 在统计意义下支配最优 ridge（见前言与文献）\cite{wu2025}。把这两条注记与 \eqref{eq:ntk-ridgeless} 放在一起，你就拿到了「为什么过参数化网络能泛化」这个问题的、目前最诚实的线性回答。
 
 \begin{figure}[htbp]
   \centering
@@ -148,7 +148,7 @@ NTK 的惊人之处在于其\textbf{宽网络极限}：以 $\tfrac{1}{\sqrt{D}}$
 \begin{exercise}\label{ex:ntk}
 对 \eqref{eq:two-layer} 的两层网络（$\sigma$ 光滑），设 $(\bm{\omega}_j, b_j) \sim \mathcal{N}(\zero, \bm{I})$ i.i.d.，$\bm{a}$ 初值独立采样且 $\E[a_j^2] = 1$。验证：宽度 $D \to \infty$ 时，初始化处的 NTK \eqref{eq:ntk-def} 逐点收敛到
 \[
-  \Theta(\bm{z},\bm{z}') = \E\big[ \sigma(\bm{\omega}^\top\bm{z}+b)\,\sigma(\bm{\omega}^\top\bm{z}'+b) \big] \;+\; \bm{z}^\top\bm{z}'\, \E\big[ \sigma'(\bm{\omega}^\top\bm{z}+b)\,\sigma'(\bm{\omega}^\top\bm{z}'+b) \big],
+  \Theta(\bm{z},\bm{z}') = \E\big[ \sigma(\bm{\omega}^\top\bm{z}+b)\,\sigma(\bm{\omega}^\top\bm{z}'+b) \big] \;+\; (\bm{z}^\top\bm{z}' + 1)\, \E\big[ \sigma'(\bm{\omega}^\top\bm{z}+b)\,\sigma'(\bm{\omega}^\top\bm{z}'+b) \big],
 \]
 并指出两项分别来自「最后一层参数」与「第一层参数」的梯度；再说明第二项（随机特征核 \eqref{eq:rf-kernel} 中没有的那一项）为何使 NTK 严格强于随机特征核。对 $\sigma = \mathrm{ReLU}$，利用正态分布的半空间矩公式把两个期望写成 $\bm{z}$、$\bm{z}'$ 角度的显式函数。
 \end{exercise}

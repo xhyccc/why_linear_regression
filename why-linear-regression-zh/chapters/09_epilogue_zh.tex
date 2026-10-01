@@ -40,7 +40,7 @@
 
 \textbf{高维线索}：当 $n \gg d$，最小二乘给出唯一、全局、闭式的解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$，它是 $\y$ 到列空间的正交投影，且在极弱的误差假设下是 Gauss--Markov 意义的最优线性无偏估计\cite{gauss1823}。当 $n$ 靠近 $d$，方差先坏、秩后坏，岭回归与 lasso 用一笔「偏差预算」换回方差，让同一个框架延续到现代高维统计\cite{hoerl1970,tibshirani1996}。
 
-\textbf{优化线索}：闭式解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$ 与梯度下降 $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ 是同一个对象的两条路径——不动点条件 $\nabla L = \zero$ 就是正规方程；把两式联立，迭代解有精确表达式 $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$，收敛条件 $0 < \eta < 2/\lambda_{\max}$ 与最优速率 $(\kappa-1)/(\kappa+1)$ 让「标准化特征」从经验升级为定理。一步到位地求逆，与用 $t$ 次多项式按揭出逆，是同一几何的两张脸。
+\textbf{优化线索}：闭式解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$ 与梯度下降 $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ 是同一个对象的两条路径——不动点条件 $\nabla L = \zero$ 就是正规方程；把两式联立，迭代解有精确表达式 $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$，收敛条件 $0 < \eta < 2/\lambda_{\max}$ 与最优速率 $(\kappa-1)/(\kappa+1)$ 把「标准化特征」从经验升级为半个定理（它只消除量纲贡献的病态，相关结构贡献的部分仍在）。一步到位地求逆，与用 $t$ 次多项式按揭出逆，是同一几何的两张脸。
 
 \textbf{欠定线索}：当 $d > n$，解不再唯一而成流形 $\widehat{\bbeta}' + \mathcal{N}(\X)$，其上每一点都是插值解与 GD 不动点；流形横向吸引、点仅 Lyapunov 稳定，落点由初值的零空间分量决定。$\widehat{\bbeta}' = \X^\top(\X\X^\top)^{-1}\y$ 是流形上唯一的最小范数点——恰为伪逆解 $\X^+\y$；GD 从零点出发隐式收敛于它，ridge 取 $\lambda \to 0^+$ 也收敛于它。\textit{五个面孔（两个闭式公式、伪逆、GD 零点极限、ridge 零极限）是同一个最小范数最小二乘解}——过参数化时代「不罚而正则」的线性原型。
 

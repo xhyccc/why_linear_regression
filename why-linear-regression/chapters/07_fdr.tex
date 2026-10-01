@@ -10,7 +10,7 @@ Suppose we have $m$ hypotheses $H_1, \dots, H_m$ (e.g.\ $H_j: \beta_j = 0$) with
   1 - (1 - \alpha)^{m_0} \ \approx\ 1 - e^{-\alpha m_0}
   \qquad (\text{almost certain for large } m_0).
 \]
-With $m = 10^4$ and $\alpha = 0.05$ this is about $99.3\%$ — \textbf{``this page is entirely false discoveries'' is not an accident; it is the default outcome}.
+With $m = 10^4$ and $\alpha = 0.05$ this is essentially $100\%$ ($1 - 0.95^{10^4} \approx 1 - e^{-513}$) — \textbf{``this page is entirely false discoveries'' is not an accident; it is the default outcome}.
 
 The classical remedy is to control the \textbf{family-wise error rate} (FWER): $\mathrm{FWER} = \Prob( V \ge 1 )$, where $V$ is the number of false rejections. The Bonferroni method compresses each test's threshold to $\alpha/m$: FWER $\le \alpha$ indeed holds, but at the price of a threshold that \textbf{tightens linearly in $m$}. At $m = 10^4$ the threshold is $5\times 10^{-6}$: unless the effect is enormous, \emph{nothing can be rejected} — the errors are controlled, and so are the discoveries.
 
@@ -91,7 +91,7 @@ Per this book's custom, three honest caveats, disclosed one by one:
 
 \subsection[Back to Regression II: Knockoffs]{Back to Regression II: Knockoffs — FDR Control Without $p$-Values}\label{sec:knockoffs}
 
-Barber and Candès (2015) took a more radical route\cite{barber2015}: \textbf{instead of manufacturing $p$-values and correcting them afterward, construct ``mirror variables'' inside the design matrix and let symmetry itself bear the control}. For each column $\x_j \in \R^n$, construct a knockoff $\tilde{\x}_j$ such that \textbf{swapping any pair $(\x_j, \tilde{\x}_j)$ leaves the joint distribution of the augmented design $[\X\ \tilde{\X}]$ unchanged} (the exchangeability property). For Gaussian designs there is an explicit construction — and it requires second-order information about the correlations among the columns of $\X$, i.e.\ \textbf{we are back to the covariance/precision matrices of Section~\ref{sec:cov-prec}}: each knockoff is calibrated to its original so that the more strongly correlated a variable, the more convincing its mirror.
+Barber and Candès (2015) took a more radical route\cite{barber2015}: \textbf{instead of manufacturing $p$-values and correcting them afterward, construct ``mirror variables'' inside the design matrix and let symmetry itself bear the control}. For each column $\x_j \in \R^n$, construct a knockoff $\tilde{\x}_j$ such that \textbf{swapping any pair $(\x_j, \tilde{\x}_j)$ leaves the joint distribution of the augmented design $[\X\ \tilde{\X}]$ unchanged} (the exchangeability property). For Gaussian designs there is an explicit construction — and it requires second-order information about the correlations among the columns of $\X$, i.e.\ \textbf{we are back to the covariance/precision matrices of Section~\ref{sec:cov-prec}}: each knockoff is calibrated to its original so that the more strongly correlated a variable, the more convincing its mirror. (A remark on conventions: the original Barber--Candès \textbf{fixed-$X$} construction requires $n \ge 2d$; the second-order construction described here is the \textbf{model-X} Gaussian version, whose high-dimensional construction remains an active research direction.)
 
 Next define an importance score $Z_j$ for each variable and $\tilde{Z}_j$ for its knockoff (e.g.\ the lasso-path order in which the variable enters the model), and combine them into the \textbf{signed statistic}
 \[
@@ -123,7 +123,7 @@ The two routes, side by side:
 Fulcrum of control & asymptotic normality of $p$-values & exchangeability symmetry of the design \\
 Model assumptions & required (linearity $+$ sparsity $+$ asymptotics) & none (model-free) \\
 Finite-sample guarantee & approximate (asymptotic) & \textbf{exact} (finite-sample) \\
-Extra cost & nodewise estimation needed for debiasing & constructing knockoffs (requires $d \le n$, or group-expansion tricks) \\
+Extra cost & nodewise estimation needed for debiasing & constructing knockoffs (fixed-$X$ construction needs $n \ge 2d$; model-X needs a known or estimable feature distribution) \\
 \bottomrule
 \end{tabular}}
 \end{center}

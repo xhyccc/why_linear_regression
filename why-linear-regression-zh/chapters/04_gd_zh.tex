@@ -130,7 +130,7 @@ $\max_j |1 - \eta\lambda_j| = \max\{|1 - \eta\lambda_{\min}|, |1 - \eta\lambda_{
 两个实践推论，都是「为什么学线性回归」的答案碎片：
 
 \begin{itemize}
-  \item \textbf{条件数统治一切。}$\kappa \approx 1$（特征方向长短一致）时 $\rho^\star \approx 0$，几步收敛；$\kappa \gg 1$（第 \ref{sec:hd-break} 节的病态）时 $\rho^\star \approx 1 - 2/\kappa$，收敛以 $O(\kappa \log(1/\varepsilon))$ 步计——\textit{与特征缩放强相关的工程经验「先标准化特征」}，在这里是定理：标准化让 $\lambda_{\max}/\lambda_{\min}$ 接近 $1$。
+  \item \textbf{条件数统治一切。}$\kappa \approx 1$（特征方向长短一致）时 $\rho^\star \approx 0$，几步收敛；$\kappa \gg 1$（第 \ref{sec:hd-break} 节的病态）时 $\rho^\star \approx 1 - 2/\kappa$，收敛以 $O(\kappa \log(1/\varepsilon))$ 步计——\textit{与特征缩放强相关的工程经验「先标准化特征」}，在这里是半个定理：标准化把 $\X^\top\X$ 的对角元归一，\textbf{消除了条件数中由量纲差异贡献的部分}——但由\textbf{相关结构}（共线）造成的特征值分散完全不受影响，$\kappa$ 仍可以很大。
   \item \textbf{预处理 = 坐标变换下的 GD。}对 $\X^\top\X$ 做谱分解后做白化，等价于在更好的坐标系里跑梯度下降；共轭梯度法（CG）则可视为「每步自动选步长与方向的 GD」，$d$ 步内\textbf{精确}到达 $\bhat$（二次函数的有限终止性）。从 GD 到 CG 到直接求逆，是一个谱系，两端是「迭代 $t$ 步」与「闭式一步」，中间全是同一几何的插值。
 \end{itemize}
 
@@ -161,7 +161,7 @@ $\max_j |1 - \eta\lambda_j| = \max\{|1 - \eta\lambda_{\min}|, |1 - \eta\lambda_{
 \begin{itemize}
   \item 梯度下降迭代 $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ 的不动点条件 $\nabla L = \zero$ 就是正规方程，唯一不动点即闭式解 $\bhat$——优化视角与代数视角终点相同；
   \item 联立两式得精确解 $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$：误差每步左乘 $\bm{I} - \eta\X^\top\X$，特征值 $1 - \eta\lambda_j$ 决定各方向衰减；
-  \item 收敛当且仅当 $0 < \eta < 2/\lambda_{\max}$；最优 $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$，渐近率 $(\kappa - 1)/(\kappa + 1)$——「标准化特征」是定理而非经验；
+  \item 收敛当且仅当 $0 < \eta < 2/\lambda_{\max}$；最优 $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$，渐近率 $(\kappa - 1)/(\kappa + 1)$——「标准化特征」消除量纲导致的病态（相关结构导致的病态它无能为力）；
   \item GD 的几何级数形式说明它在用 $t$ 次多项式逼近 $(\X^\top\X)^{-1}$：闭式解直给逆，迭代解按揭逆；共轭梯度是谱系的中点。
 \end{itemize}
 \end{keybox}

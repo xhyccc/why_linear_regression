@@ -10,7 +10,7 @@
   1 - (1 - \alpha)^{m_0} \ \approx\ 1 - e^{-\alpha m_0}
   \qquad (m_0 \text{ 大时几乎必然发生}).
 \]
-$m = 10^4$、$\alpha = 0.05$ 时约 $99.3\%$——\textbf{「这一页里全是假的」不是意外，是默认结局}。
+$m = 10^4$、$\alpha = 0.05$ 时几乎为 $100\%$（$1 - 0.95^{10^4} \approx 1 - e^{-513}$）——\textbf{「这一页里全是假的」不是意外，是默认结局}。
 
 古典的补救是控制\textbf{族错误率}（Family-Wise Error Rate, FWER）：$\mathrm{FWER} = \Prob( V \ge 1 )$，其中 $V$ = 误拒（假发现）的个数。Bonferroni 方法把每个检验的阈值压到 $\alpha/m$：FWER $\le \alpha$ 确实成立，但代价是\textbf{阈值随 $m$ 线性收紧}。$m = 10^4$ 时阈值是 $5\times 10^{-6}$：除非效应巨大，否则\emph{什么也拒绝不了}——控制住了错误，也控制住了发现。
 
@@ -90,7 +90,7 @@ Abramovich、Benjamini、Donoho 与 Johnstone（2006）把这层观察变成了�
 
 \subsection[回到回归 II：Knockoffs]{回到回归 II：Knockoffs——不依赖 $p$ 值的 FDR 控制}\label{sec:knockoffs}
 
-Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\textbf{不去造 $p$ 值再校正，而是在设计矩阵里人为构造「影子变量」，让对称性本身成为控制的支点}。对每列 $\x_j \in \R^n$，构造影子（knockoff）$\tilde{\x}_j$，使得\textbf{交换任意一对 $(\x_j, \tilde{\x}_j)$ 后，增广设计矩阵 $[\X\ \tilde{\X}]$ 的联合分布不变}（交换性）。高斯设计下有显式构造——它需要 $\X$ 列相关的二阶信息，即\textbf{又回到了第 \ref{sec:cov-prec} 节的协方差/精度矩阵}：影子变量按相关性「补齐」原变量，相关越强的变量，其影子越能以假乱真。
+Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\textbf{不去造 $p$ 值再校正，而是在设计矩阵里人为构造「影子变量」，让对称性本身成为控制的支点}。对每列 $\x_j \in \R^n$，构造影子（knockoff）$\tilde{\x}_j$，使得\textbf{交换任意一对 $(\x_j, \tilde{\x}_j)$ 后，增广设计矩阵 $[\X\ \tilde{\X}]$ 的联合分布不变}（交换性）。高斯设计下有显式构造——它需要 $\X$ 列相关的二阶信息，即\textbf{又回到了第 \ref{sec:cov-prec} 节的协方差/精度矩阵}：影子变量按相关性「补齐」原变量，相关越强的变量，其影子越能以假乱真。（口径注记：原始 Barber--Candès 的\textbf{固定-$X$} 构造要求 $n \ge 2d$；本书描述的按二阶信息构造影子是 \textbf{model-X} 高斯版本，其高维构造至今仍是活跃研究方向。）
 
 接着定义每个变量的特征重要性 $Z_j$ 与其影子的重要性 $\tilde{Z}_j$（例如 lasso 路径上该变量进入模型的次序），合成\textbf{带符号统计量}
 \[
@@ -121,7 +121,7 @@ Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\text
 控制支点 & $p$ 值的渐近正态性 & 设计矩阵的交换对称性 \\
 模型假设 & 需要（线性 + 稀疏 + 渐近） & 不需要（模型无关） \\
 有限样本保证 & 近似（渐近成立） & \textbf{精确}（有限样本） \\
-额外代价 & debias 需要的 nodewise 估计 & 构造影子变量（需 $d \le n$，或组扩张技巧） \\
+额外代价 & debias 需要的 nodewise 估计 & 构造影子变量（固定-$X$ 构造需 $n \ge 2d$；model-X 需已知或可估特征分布） \\
 \bottomrule
 \end{tabular}
 \end{center}

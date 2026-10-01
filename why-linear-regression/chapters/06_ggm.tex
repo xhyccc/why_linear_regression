@@ -86,7 +86,7 @@ The preceding sections gave the language of graphical models: up to $\binom{d}{2
 \textbf{Three faces of sparsity, one sentence each.}
 \begin{enumerate}[label=(\arabic*)]
   \item \textbf{Combinatorial face}: model selection — finding the correct one among $2^d$ subsets. The general problem is NP-hard, but under sparsity it becomes tractable (small $s$ collapses the search space).
-  \item \textbf{Geometric face}: the $\ell_0$ ball $\{\bbeta : \norm{\bbeta}_0 \le s\}$ is nonconvex, but its \textbf{convex hull} is the $\ell_1$ ball $\{\bbeta : \norm{\bbeta}_1 \le R\}$ — $\ell_1$ is the ``convex relaxation'': the relaxed problem is convex again, and the price of relaxation (recovery conditions) can be quantified via incoherence and the restricted eigenvalue condition.
+  \item \textbf{Geometric face}: the $\ell_0$ ball $\{\bbeta : \norm{\bbeta}_0 \le s\}$ is nonconvex, and $\ell_1$ is its \textbf{convex relaxation} (the sharp envelope relation is $\norm{\bbeta}_1 \le \sqrt{s}\,\norm{\bbeta}_2$; ``the convex hull is exactly the $\ell_1$ ball'' holds only for $s = 1$): the relaxed problem is convex again, and the price of relaxation (recovery conditions) can be quantified via incoherence and the restricted eigenvalue condition.
   \item \textbf{Statistical face}: effective degrees of freedom --- the lasso fit $\X\widehat{\bbeta}$ has $\widehat{df} = \E[\norm{\widehat{\bbeta}}_0]$, so \textbf{a sparse model's complexity is charged by the variables it actually uses}, not by $d$. This explains why the variance of a sparse estimator can be far below $O(d/n)$.
 \end{enumerate}
 

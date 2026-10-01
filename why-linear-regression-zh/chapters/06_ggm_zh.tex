@@ -73,7 +73,7 @@
   \item \textbf{传播}：Meek 规则把方向沿图继续传播。
 \end{enumerate}
 
-与第 \ref{sec:1d-causality} 章呼应：相关系数本身永不给方向，但\textbf{一组条件独立检验}能在「图 faithful 于分布」的额外假设下恢复出部分 DAG；因果结论的合法性仍然来自假设清单，而不是来自数据本身——只是现在假设可以被逐一检验、逐一反驳。
+与第 \ref{sec:1d-causality} 节呼应：相关系数本身永不给方向，但\textbf{一组条件独立检验}能在「图 faithful 于分布」的额外假设下恢复出部分 DAG；因果结论的合法性仍然来自假设清单，而不是来自数据本身——只是现在假设可以被逐一检验、逐一反驳。
 
 \subsection{稀疏性：为什么「大多数系数是零」是可计算的假设}\label{sec:sparsity}
 
@@ -86,7 +86,7 @@
 \textbf{稀疏性的三个面孔，一句话一个。}
 \begin{enumerate}[label=(\arabic*)]
   \item \textbf{组合面孔}：模型选择——在 $2^d$ 个子集中找正确的一个。NP-hard 的一般问题在稀疏假设下可解（$s$ 小使搜索空间塌缩）。
-  \item \textbf{几何面孔}：$\ell_0$ 球 $\{\bbeta : \norm{\bbeta}_0 \le s\}$ 非凸，但其\textbf{凸包}是 $\ell_1$ 球 $\{\bbeta : \norm{\bbeta}_1 \le R\}$——$\ell_1$ 是「凸松弛」，松弛后的优化问题重新变凸，而松弛的代价（恢复条件）可用不相干性与限制特征值（restricted eigenvalue）定量刻画。
+  \item \textbf{几何面孔}：$\ell_0$ 球 $\{\bbeta : \norm{\bbeta}_0 \le s\}$ 非凸，$\ell_1$ 是它的\textbf{凸松弛}（严格的包络关系是 $\norm{\bbeta}_1 \le \sqrt{s}\,\norm{\bbeta}_2$；「凸包恰为 $\ell_1$ 球」只在 $s = 1$ 时成立）：松弛后的优化问题重新变凸，而松弛的代价（恢复条件）可用不相干性与限制特征值（restricted eigenvalue）定量刻画。
   \item \textbf{统计面孔}：有效自由度。lasso 拟合 $\X\widehat{\bbeta}$ 的自由度 $\widehat{df} = \E[\text{非零系数个数}]$——\textbf{稀疏模型的复杂度由它实际用到的变量数来计}，而不是由 $d$。这解释了为什么稀疏估计的方差可以远小于 $O(d/n)$。
 \end{enumerate}
 

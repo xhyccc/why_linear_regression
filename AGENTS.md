@@ -104,7 +104,7 @@ Fan–Li–Zhang–Zou 2020 / Bach 2024 / Wu et al. 2025 (GD dominates ridge)。
 - Galton 1886：$y = 0.516\,x + 33.73$ 英寸，$r\approx 0.5$ —— 「回归均值」是 $|r|<1$ 的算术，非生物学定律。
 - 方差视角：$\Var(y) = b^2\Var(x) + \Var(\varepsilon)$（设 $\Cov(x,\varepsilon)=0$，**这已是方向性假设**）；
   相关性 = 方差的转移。
-- 方向性：$y\sim x$ 与 $x\sim y$ 是两条不同的线；回归系数之积 $= r^2$，同一坐标系几何斜率之积 $=1$；
+- 方向性：$y\sim x$ 与 $x\sim y$ 是两条不同的线；回归系数之积 $= r^2$，同一坐标系几何斜率之积 $=(\sigma_y/\sigma_x)^2$（$\sigma_x=\sigma_y$ 含标准化时为 $1$）；
   椭圆点云上两条回归线都不是主轴（主轴 = PCA，最小化垂直距离）。
 - 因果：$x\to y$、$y\to x$、共同原因 $z$ 三种结构产生**同一个 $r$；Reichenbach 共同原因原理给枚举、
   Wright 路径分析给「有外部因果知识时的演算」，数据本身永远不能判定方向。
@@ -168,6 +168,7 @@ Fan–Li–Zhang–Zou 2020 / Bach 2024 / Wu et al. 2025 (GD dominates ridge)。
 - **Knockoffs**（Barber–Candès 2015）：在设计矩阵中造影子变量 $\tilde\X$；$W_j = |Z_j| - |\tilde Z_j|$，
   零假设下 $W_j \overset d= -W_j$（交换等变性）；knockoff+ 阈值
   $\min\{t : \frac{1+\#\{W_j\le -t\}}{\#\{W_j\ge t\}} \le q\}$。模型无关、有限样本精确 FDR 控制。
+  口径：固定-$X$ 构造需 $n\ge 2d$；model-X 高斯构造需已知/可估特征分布（书中描述的是后者）。
 - 两路线对比：BH+debiased lasso 依赖渐近正态（近似保证）；knockoffs 靠交换对称（精确保证，
   构造需 $d\le n$ 或 group-expansion 技巧）。
 

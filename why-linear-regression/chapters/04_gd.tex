@@ -130,7 +130,7 @@ Both boundaries, $1/\lambda_{\max}$ and $2/\lambda_{\max}$, depend only on the l
 Two practical corollaries, both fragments of the answer to ``why study linear regression'':
 
 \begin{itemize}
-  \item \textbf{The condition number rules everything.} When $\kappa \approx 1$ (eigen-directions of similar length), $\rho^\star \approx 0$ and convergence takes a handful of steps; when $\kappa \gg 1$ (the ill-conditioning of Section~\ref{sec:hd-break}), $\rho^\star \approx 1 - 2/\kappa$ and convergence needs $O(\kappa \log(1/\varepsilon))$ steps — \textit{the engineering folklore ``standardize your features first,'' so strongly tied to feature scaling, is here a theorem}: standardization pushes $\lambda_{\max}/\lambda_{\min}$ toward $1$.
+  \item \textbf{The condition number rules everything.} When $\kappa \approx 1$ (eigen-directions of similar length), $\rho^\star \approx 0$ and convergence takes a handful of steps; when $\kappa \gg 1$ (the ill-conditioning of Section~\ref{sec:hd-break}), $\rho^\star \approx 1 - 2/\kappa$ and convergence needs $O(\kappa \log(1/\varepsilon))$ steps — \textit{the engineering folklore ``standardize your features first''} is here half a theorem: standardization normalizes the diagonal of $\X^\top\X$ and \textbf{removes the part of the condition number due to units} --- but eigenvalue spread caused by \textbf{correlation structure} (collinearity) is untouched, and $\kappa$ can still be large.
   \item \textbf{Preconditioning $=$ GD in better coordinates.} Whitening after a spectral decomposition of $\X^\top\X$ is equivalent to running gradient descent in a better coordinate system; conjugate gradients (CG) can be viewed as ``GD with an automatically chosen step size and direction at every step,'' reaching $\bhat$ \textbf{exactly} in $d$ steps (finite termination for quadratic functions). From GD to CG to direct inversion is one family: the two ends are ``iterate $t$ steps'' and ``one closed-form step,'' and everything in between is an interpolation of the same geometry.
 \end{itemize}
 
@@ -162,7 +162,7 @@ Relation to $\bhat$ & It \emph{is} $\bhat$ & Its fixed point is $\bhat$; $\wideh
 \begin{itemize}
   \item The fixed-point condition $\nabla L = \zero$ of the iteration $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ \emph{is} the normal equation; the unique fixed point is the closed-form solution $\bhat$ — the optimization and the algebraic views end at the same place;
   \item Combining the two formulas yields the exact solution $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$: the error is multiplied by $\bm{I} - \eta\X^\top\X$ each step, and the eigenvalues $1 - \eta\lambda_j$ govern the decay direction by direction;
-  \item Convergence requires $0 < \eta < 2/\lambda_{\max}$; the optimal $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$ has rate $(\kappa - 1)/(\kappa + 1)$ — ``standardize your features'' is a theorem, not folklore;
+  \item Convergence requires $0 < \eta < 2/\lambda_{\max}$; the optimal $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$ has rate $(\kappa - 1)/(\kappa + 1)$ — ``standardize your features'' removes unit-driven ill-conditioning (correlation-driven ill-conditioning it cannot fix);
   \item The geometric-series form shows GD assembling $(\X^\top\X)^{-1}$ by a degree-$t$ polynomial: the closed form hands over the inverse, the iteration pays it in installments; conjugate gradients is the midpoint of the family.
 \end{itemize}
 \end{keybox}
