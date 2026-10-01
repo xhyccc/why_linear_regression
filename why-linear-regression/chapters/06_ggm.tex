@@ -79,7 +79,7 @@ Echoing Chapter~\ref{sec:onedim}: the correlation coefficient never yields direc
 
 The preceding sections gave the language of graphical models: up to $\binom{d}{2}$ edges among $d$ variables, $d^2$ precision-matrix entries to estimate. When $d > n$ this is hopeless — unless we are willing to believe something very specific: \textbf{the true graph is sparse}, and most $\Theta_{ij} = 0$. This section explains why the assumption is not only plausible but ``computable.''
 
-\textbf{Sparsity is a falsifiable assumption, not a prayer.} ``Most coefficients are zero'' means the graph has $s \ll d^2$ edges; when the true edge count satisfies $s \log d \ll n$, a family of methods (next section) recovers the graph structure \textbf{exactly} with high probability. Conversely, if the world is truly dense, sparse methods fail honestly — cross-validation will not settle on a stable structure. This matches the Chapter~\ref{sec:1d-causality} spirit of ``fit first, then audit the assumptions'': the sparsity assumption can and should be audited.
+\textbf{Sparsity is a falsifiable assumption, not a prayer.} ``Most coefficients are zero'' means the graph has $s \ll d^2$ edges; when the true edge count satisfies $s \log d \ll n$, a family of methods (next section) recovers the graph structure \textbf{exactly} with high probability. Conversely, if the world is truly dense, sparse methods fail honestly — cross-validation will not settle on a stable structure. This matches the spirit of Chapter~\ref{sec:1d-causality} --- ``fit first, then audit the assumptions'': the sparsity assumption can and should be audited.
 
 \textbf{Where does sparsity come from?} Three independent sources. (1) \textbf{Scientific}: in gene regulatory networks each gene is regulated by few transcription factors; in social networks each person has few close contacts — ``bounded nonzeros per row'' is prior knowledge in many fields, mathematically $s = O(d)$ edges. (2) \textbf{Statistical}: under suitable designs, a sparse model's effective degrees of freedom are $\ll d$ (below), and the sample complexity is governed by the \textbf{number of nonzeros} rather than the dimension — this is the very meaning of the term ``high-dimensional statistics'': $d$ may exceed $n$ as long as the support of the true parameter is smaller than $n$. (3) \textbf{Computational}: sparsity turns a $d^2$-dimensional continuous optimization into ``find which coordinates are nonzero $+$ estimate their values,'' and the latter has explicit algorithms and error bounds.
 
@@ -111,7 +111,7 @@ whose $\ell_1$ geometry (the corners of the constraint set) drives some coordina
 where the $\ell_2$ term lets \textbf{whole groups of highly correlated variables enter the model together} (fixing lasso's habit of picking one member of a correlated group at random) — well suited to group-correlated data such as gene expression. The remaining two move the penalty to the matrix level:
 
 \begin{itemize}
-  \item \textbf{Nodewise lasso} (Meinshausen \& Bühlmann, 2006): regress each variable on all the others via \eqref{eq:lasso}, and connect $i$ to $j$ in the graph whenever a coefficient is nonzero — Section~\ref{sec:beta-theta} says this is equivalent to recovering the precision matrix column by column\cite{tibshirani1996,meinshausen2006}.
+  \item \textbf{Nodewise lasso} (Meinshausen \& B\"uhlmann, 2006): regress each variable on all the others via \eqref{eq:lasso}, and connect $i$ to $j$ in the graph whenever a coefficient is nonzero — Section~\ref{sec:beta-theta} says this is equivalent to recovering the precision matrix column by column\cite{tibshirani1996,meinshausen2006}.
   \item \textbf{Graphical lasso} (Friedman, Hastie \& Tibshirani, 2008): penalize the likelihood of the precision matrix directly,
   \[
     \min_{\bm{\Theta} \succ \zero} \ \trace(\bm{S}\bm{\Theta}) - \log\det \bm{\Theta} + \lambda \norm{\bm{\Theta}}_1 ,
@@ -145,7 +145,7 @@ Algebraically (Exercise~\ref{ex:debiased}): $\widetilde{\bbeta} - \bbeta = \frac
   \qquad
   \text{confidence intervals:}\ \widetilde{\beta}_j \pm z_{1-\alpha/2}\, \frac{\hat\sigma}{\sqrt{n}} \sqrt{ \big( \widehat{\bm{\Theta}}\, \bm{S}\, \widehat{\bm{\Theta}} \big)_{jj} } .
 \end{equation}
-\cite{zhang2014,vandegeer2014} In high dimensions, \textbf{asymptotically normal inference for a single coefficient} is thus restored — and by \eqref{eq:beta-theta}, testing $H_0: \beta_j = 0$ \emph{is} \textbf{testing the conditional independence of $y$ and $x_j$}. The whole pipeline closes:
+In high dimensions, \textbf{asymptotically normal inference for a single coefficient} is thus restored\cite{zhang2014,vandegeer2014} — and by \eqref{eq:beta-theta}, testing $H_0: \beta_j = 0$ \emph{is} \textbf{testing the conditional independence of $y$ and $x_j$}. The whole pipeline closes:
 
 \begin{keybox}[From estimate to inference]
 \[
