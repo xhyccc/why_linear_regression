@@ -5,7 +5,7 @@
 \begin{equation}\label{eq:feature-map}
   \x_i = \phi(\bm{z}_i), \qquad \bm{z}_i \in \R^q \ \text{(潜变量)}, \quad \phi : \R^q \to \R^d \ \text{(特征映射)},
 \end{equation}
-其中维度 $d$ 可以任意大——包括无穷大。对 $\y = \X \bbeta + \bm{\varepsilon}$ 做最小二乘，就是把第 \ref{sec:highdim}--\ref{sec:gd-underdet} 章的全部机器开在 $\bm{\Phi} := [\phi(\bm{z}_1)^\top; \dots; \phi(\bm{z}_n)^\top] \in \R^{n \times d}$ 上。本章的核心结论是：\textbf{$\X$ 与 $\y$ 之间的线性回归，在潜变量 $\bm{z}$ 的世界里表现为一个核方法（kernel method）——预测对 $\bm{z}$ 是非线性的，而计算只需要 $n \times n$ 的核矩阵}。
+其中\textbf{潜空间维度 $q$ 与特征维度 $d$ 都可以任意大}——包括无穷大：例如 $\bm{z}$ 本身可以是函数（此时 $\phi$ 是函数到函数的映射），只要核函数 $k(\bm{z}, \bm{z}')$ 仍能算出数值，本章的全部机器照常运转。对 $\y = \X \bbeta + \bm{\varepsilon}$ 做最小二乘，就是把第 \ref{sec:highdim}--\ref{sec:gd-underdet} 章的全部机器开在 $\bm{\Phi} := [\phi(\bm{z}_1)^\top; \dots; \phi(\bm{z}_n)^\top] \in \R^{n \times d}$ 上。本章的核心结论是：\textbf{$\X$ 与 $\y$ 之间的线性回归，在潜变量 $\bm{z}$ 的世界里表现为一个核方法（kernel method）——预测对 $\bm{z}$ 是非线性的，而计算只需要 $n \times n$ 的核矩阵}。
 
 \subsection{核函数与 Gram 矩阵：把内积当作唯一接口}\label{sec:kernel-def}
 

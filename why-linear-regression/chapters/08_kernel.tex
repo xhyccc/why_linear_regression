@@ -5,7 +5,7 @@ Chapter~\ref{sec:intro} said it: ``linear'' is a requirement on the \textbf{para
 \begin{equation}\label{eq:feature-map}
   \x_i = \phi(\bm{z}_i), \qquad \bm{z}_i \in \R^q \ \text{(latent)}, \quad \phi : \R^q \to \R^d \ \text{(feature map)},
 \end{equation}
-where the dimension $d$ may be arbitrarily large --- including infinite. Running least squares on $\y = \X \bbeta + \bm{\varepsilon}$ is then simply pointing the entire machinery of Chapters~\ref{sec:highdim}--\ref{sec:gd-underdet} at the feature matrix
+where \textbf{both the latent dimension $q$ and the feature dimension $d$ may be arbitrarily large} --- including infinite: $\bm{z}$ itself may be a function (with $\phi$ mapping functions to functions), and as long as the kernel values $k(\bm{z}, \bm{z}')$ can still be evaluated, the entire machinery of this chapter runs unchanged. Running least squares on $\y = \X \bbeta + \bm{\varepsilon}$ is then simply pointing the entire machinery of Chapters~\ref{sec:highdim}--\ref{sec:gd-underdet} at the feature matrix
 \[
   \bm{\Phi} := \big[\phi(\bm{z}_1)^\top;\ \dots;\ \phi(\bm{z}_n)^\top\big] \in \R^{n \times d} .
 \]
