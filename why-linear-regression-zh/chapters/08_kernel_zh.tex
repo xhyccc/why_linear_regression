@@ -133,7 +133,7 @@ NTK 的惊人之处在于其\textbf{宽网络极限}：以 $\tfrac{1}{\sqrt{D}}$
 \xrightarrow[\text{全参数训练、宽极限}]{\ \mathrm{NTK}\ } \text{ 深度网络的函数空间极限}
 \end{gathered}
 \]
-四个箭头分别由本章第 \ref{sec:kernel-overdet} 节（push-through）、\eqref{eq:rf-kernel}（大数定律）、第 \ref{sec:implicit} 章（隐式正则化）与 \eqref{eq:ntk-ridgeless}（NTK 不动性）支撑。\textbf{线性回归不是深度学习的特例；深度学习的宽极限是线性回归的核化}——这就是为什么两百年前的这条直线，仍然是理解今天一切模型的最诚实的起点。
+四个箭头分别由本章第 \ref{sec:kernel-overdet} 节（push-through）、\eqref{eq:rf-kernel}（大数定律）、第 \ref{sec:implicit} 节（隐式正则化）与 \eqref{eq:ntk-ridgeless}（NTK 不动性）支撑。\textbf{线性回归不是深度学习的特例；深度学习的宽极限是线性回归的核化}——这就是为什么两百年前的这条直线，仍然是理解今天一切模型的最诚实的起点。
 \end{keybox}
 
 两点务实的注记。其一，NTK 描述的是「lazy training」\textit{懒惰训练} regime：参数初始化尺度大、训练位移小，网络「懒得」改变内部特征——真实深度学习中特征学习（feature learning）发生时 NTK 失效，此时理论仍在建设中（Jacot 本人区分 lazy regime 与 feature-learning regime 的后续工作即为此）。其二，ridgeless 插值\textbf{非但不坏、还可能更好}：Belkin 等人的 double descent 观察表明，现代过参数模型的测试误差在插值阈值之后继续下降\cite{belkin2019}——第 \ref{sec:minnorm} 节的最小范数解正是这一现象最干净的线性化身，Jingfeng Wu 等人的工作进一步证明最优提前停止的 GD 在统计意义下支配最优 ridge（见前言与文献）\cite{wu2025}。把这两条注记与 \eqref{eq:ntk-ridgeless} 放在一起，你就拿到了「为什么过参数化网络能泛化」这个问题的、目前最诚实的线性回答。
