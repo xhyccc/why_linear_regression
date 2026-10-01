@@ -5,6 +5,7 @@
 
 \begin{figure}[htbp]
   \centering
+  \resizebox{\textwidth}{!}{%
   \begin{tikzpicture}[
       font=\small,
       box/.style={draw=blue!50!black, fill=blue!5, rounded corners=2pt,
@@ -31,7 +32,8 @@
     \draw[arr] (inf) -- (fdr) node[lab, right=2pt]{多重检验};
     \draw[arr] (onedim) -- (kernel) node[lab, left=2pt]{特征映射};
     \draw[arr] (kernel) -- (ntk) node[lab, left=2pt]{宽极限};
-  \end{tikzpicture}
+  \end{tikzpicture}%
+  }
   \caption{全书的路线图：一条直线出发，经闭式解与迭代两条路，在欠定情形收拢为最小范数插值，经精度矩阵升级为逐系数的推断，再经多重检验升级为规模化推断（一页结论的可信度），经特征映射核化，最终桥接到深度网络的宽极限。}
   \label{fig:ch8-roadmap}
 \end{figure}
@@ -53,7 +55,7 @@
 \textbf{历史线索}：从 Legendre 与 Gauss 为谷神星轨道而写下的附录\cite{legendre1805,gauss1809}，到 Galton 的身高散点图\cite{galton1886}，再到今天的每一个回归输出层——熬过了这一切的，不是一个技巧，而是一个关于「数据如何遇见模型」的定理。
 
 \begin{keybox}[最终答案]
-因为线性回归是\textbf{唯一}同时做到以下四点的模型：
+因为线性回归是\textbf{唯一}把以下四点同时做到这个程度的\textbf{常规}模型：
 \begin{enumerate}[label=(\roman*)]
   \item \textbf{可精确求解}：凸二次问题，闭式解，毫秒级，无超参数、无局部极小；
   \item \textbf{可解释}：每个系数有话可说，$R^2$、杠杆、自由度各有几何意义；

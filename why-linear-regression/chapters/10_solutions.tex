@@ -255,7 +255,7 @@ Under the standard initialization $\E[a^2] = 1$ this is
 \[
   \Theta(\bm{z},\bm{z}') = \underbrace{\E\big[\sigma(u)\sigma(u')\big]}_{\text{output-layer contribution (= RF kernel)}} + (\bm{z}^\top\bm{z}' + 1)\,\E\big[\sigma'(u)\sigma'(u')\big] .
 \]
-Two remarks: if the \textbf{biases are fixed} and not trained, the second term degenerates to $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$ (the form stated in the exercise uses this convention); if the biases are trained together with the other first-layer parameters, the inner product picks up an additional $1 \times 1$, i.e., $\bm{z}^\top\bm{z}' + 1$ --- this solution adopts the latter.
+Two remarks: if the \textbf{biases are fixed} and not trained, the second term degenerates to $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$; if the biases are trained together with the other first-layer parameters, the inner product picks up an additional $1 \times 1$, i.e., $\bm{z}^\top\bm{z}' + 1$ --- the convention stated in the exercise, and the one this solution adopts.
 
 \textbf{Comparison with the RF kernel.} The RF kernel $k_{\mathrm{RF}}(\bm{z},\bm{z}') = \E[\sigma(u)\sigma(u')]$ contains only the output-layer contribution; the NTK has an extra derivative term, which at $\bm{z} = \bm{z}'$ satisfies $\E[\sigma'(u)^2] > 0$ and is strictly positive --- hence $\Theta \succeq k_{\mathrm{RF}}$ (as kernel matrices), strictly stronger than the RF kernel. $\square$
 

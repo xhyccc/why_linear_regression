@@ -97,7 +97,7 @@ Next define an importance score $Z_j$ for each variable and $\tilde{Z}_j$ for it
 \[
   W_j = Z_j - \tilde{Z}_j ,
 \]
-whose sign records whether the original beats its mirror. The key observation: under $H_{0j}$ ($\x_j$ is independent of $\y$), the original and the knockoff are indistinguishable, and exchangeability gives
+whose sign records whether the original beats its mirror.\footnote{Convention note: the original Barber--Cand\`es paper uses the absolute-value statistic $|Z_j| - |\tilde{Z}_j|$; \emph{any} antisymmetric combination of $(Z_j, \tilde{Z}_j)$ enjoys the same sign-flip property \eqref{eq:knockoff-sym}, and the signed difference above is the simplest such choice.} The key observation: under $H_{0j}$ ($\x_j$ is independent of $\y$), the original and the knockoff are indistinguishable, and exchangeability gives
 \begin{equation}\label{eq:knockoff-sym}
   W_j \ \overset{d}{=}\ -W_j
   \qquad (H_{0j}, \text{ conditional on everything else}),

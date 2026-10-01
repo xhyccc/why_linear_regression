@@ -69,7 +69,7 @@ which Fisher's $z$-transform can test directly in low dimensions; in high dimens
 
 \begin{enumerate}[label=(\alph*)]
   \item \textbf{Edge deletion}: for each pair of variables, search over conditioning sets $S$; as soon as $i \perp j \mid S$ is accepted, delete the undirected edge between $i$ and $j$ — common causes and indirect paths are exposed by exactly this test (the operable version of Reichenbach's principle\cite{reichenbach1956});
-  \item \textbf{Orientation}: for structures $i - k - j$ with $i, j$ nonadjacent (v-structures), Markov $+$ faithfulness allow orienting $i \to k \leftarrow j$ — \textbf{the data itself gives the direction of some arrows};
+  \item \textbf{Orientation}: for structures $i - k - j$ with $i, j$ nonadjacent (v-structures), Markov $+$ faithfulness allow orienting $i \to k \leftarrow j$ — \textbf{the data itself gives the direction of some arrows} (Markov: pairs absent from the graph are independent given the rest; faithfulness: no conditional independence holds that the graph does not entail --- together they make graph and distribution determine each other uniquely);
   \item \textbf{Propagation}: Meek's rules propagate orientations further along the graph.
 \end{enumerate}
 

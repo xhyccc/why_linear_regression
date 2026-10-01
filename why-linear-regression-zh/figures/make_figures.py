@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
 """为《Why (we still need) linear regression》生成全部插图。
-统一风格：managed runtime setup_plot（含 CJK 字体），固定随机种子，输出 figures/。
+零依赖：任何标准 matplotlib/numpy/scipy 环境均可复现书中全部插图与数值实验。
+优先使用 managed runtime 的 setup_plot（含 CJK 字体），缺失时自动退回通用 rcParams。
+固定随机种子，输出 figures/。
 """
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(sys.executable).parent.parent.parent))
-from daimon_runtime import setup_plot
-
-setup_plot()
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
+try:  # 优先使用托管运行时样式（含 CJK 字体）
+    sys.path.insert(0, str(Path(sys.executable).parent.parent.parent))
+    from daimon_runtime import setup_plot
+    setup_plot()
+except Exception:  # 零依赖回退：图照常生成，使用通用 rcParams + 系统中文字体
+    import matplotlib.font_manager as fm
+    cjk = [f for f in ("PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+                       "Noto Sans CJK SC", "SimHei", "WenQuanYi Micro Hei")
+           if f in {x.name for x in fm.fontManager.ttflist}]
+    plt.rcParams.update({
+        "font.size": 11,
+        "font.sans-serif": cjk + ["DejaVu Sans"],
+        "axes.unicode_minus": False,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "figure.dpi": 130,
+    })
 
 OUT = Path(__file__).parent
 rng = np.random.default_rng(20261001)
@@ -352,7 +370,7 @@ def ch6_lassopath():
 
 
 # ---------------------------------------------------------------- ch7 核方法
-def ch7_kernel():
+def ch8_kernel():
     # XOR 型非线性数据 + 特征映射后线性可分
     n = 80
     t = rng.uniform(0, 2 * np.pi, n)
@@ -387,34 +405,71 @@ def ch7_kernel():
     ax.set_xlabel("$x_1+x_2=z_1^2+z_2^2$"); ax.set_ylabel(r"$x_3=\sqrt{2}\,z_1z_2$")
     ax.legend(fontsize=9); ax.grid(alpha=0.25)
     fig.tight_layout()
-    save(fig, "ch7_kernel.png")
+    save(fig, "ch8_kernel.png")
 
 
 # ---------------------------------------------------------------- ch7 double descent
-def ch7_doubledescent():
-    g = np.geomspace(0.05, 1.0, 120)
-    g2 = np.geomspace(1.0, 30, 120)
-    # 经典 U 型 + 插值尖峰 + 第二次下降（示意曲线）；两段在阈值处衔接
-    u = 0.16 + 0.5 * np.exp(-2.5 * g) + 0.24 * g ** 3
-    peak = 0.9
-    dd = 0.16 + 0.75 / np.sqrt(g2) + 0.02 * np.log(g2)
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
-    ax.plot(g, u, color=C_DATA, lw=2.2, label="经典偏差--方差权衡")
-    ax.plot([g[-1], 1.0], [u[-1], peak], color=C_DATA, lw=2.2)
-    ax.plot(g2, dd, color=C_FIT, lw=2.2,
-            label="现代观察：插值阈值后误差再降（double descent）")
-    ax.plot([1.0], [peak], "^", color="k", ms=10)
+def ch8_doubledescent():
+    """真实的 double descent 模拟实验（非示意曲线）：各向同性高斯设计，
+    固定 n，让 d 扫过插值阈值 d = n。
+    估计量：OLS/最小范数 ridgeless 最小二乘（SVD 形式，第 3、5 章）
+    与验证集调参的 ridge（第 3 章）。
+    测试 MSE = ||beta_hat - beta||^2 + sigma^2（各向同性测试点下为精确值），
+    对 reps 次设计抽样取平均。"""
+    n = 200
+    sigma = 0.5
+    reps = 25
+    lam_grid = np.logspace(-1, 3.5, 12)
+    dvals = np.unique(np.round(np.concatenate([
+        np.geomspace(0.05, 0.95, 40),
+        np.linspace(0.96, 1.04, 9),
+        np.geomspace(1.06, 8.0, 40),
+    ]) * n).astype(int))
+    dvals = dvals[dvals >= 2]
+    g = dvals / n
+    risk_ls = np.zeros(len(dvals))
+    risk_rg = np.zeros(len(dvals))
+    for i, d in enumerate(dvals):
+        acc_ls = np.empty(reps)
+        acc_rg = np.empty(reps)
+        for r in range(reps):
+            X = rng.standard_normal((n, d))
+            beta = rng.standard_normal(d)
+            beta /= np.linalg.norm(beta)
+            y = X @ beta + sigma * rng.standard_normal(n)
+            Xv = rng.standard_normal((n, d))
+            yv = Xv @ beta + sigma * rng.standard_normal(n)
+            U, s, Vt = np.linalg.svd(X, full_matrices=False)
+            uty = U.T @ y
+            # ridgeless：d < n 时为 OLS，d >= n 时为最小范数解（同一 SVD 公式）
+            b_ls = Vt.T @ (uty / s)
+            acc_ls[r] = np.sum((b_ls - beta) ** 2) + sigma ** 2
+            # ridge：lambda 用验证集 (Xv, yv) 上的 MSE 调参
+            coef = (s[:, None] / (s[:, None] ** 2 + lam_grid[None, :])) * uty[:, None]
+            pred = Xv @ (Vt.T @ coef)                       # n x len(lam_grid)
+            mses = np.mean((pred - yv[:, None]) ** 2, axis=0)
+            b_rg = Vt.T @ (coef[:, int(np.argmin(mses))])
+            acc_rg[r] = np.sum((b_rg - beta) ** 2) + sigma ** 2
+        risk_ls[i] = acc_ls.mean()
+        risk_rg[i] = acc_rg.mean()
+    fig, ax = plt.subplots(figsize=(6.6, 4.2))
+    ax.plot(g, risk_ls, color=C_FIT, lw=2.2,
+            label="Ridgeless（$d<n$ 为 OLS，$d\\geq n$ 为最小范数解）：$d=n$ 处尖峰后再降")
+    ax.plot(g, risk_rg, color=C_DATA, lw=2.2,
+            label="Ridge（验证集调 $\\lambda$）：无尖峰")
+    k0 = int(np.argmin(np.abs(g - 1.0)))
+    ax.plot([g[k0]], [risk_ls[k0]], "^", color="k", ms=10)
     ax.annotate("插值阈值 $d=n$：\n训练误差恰为零",
-                xy=(1.0, peak), xytext=(3.2, 0.75), fontsize=10,
-                arrowprops=dict(arrowstyle="->", color="k"))
+                xy=(g[k0], risk_ls[k0]), xytext=(1.7, 120),
+                fontsize=10, arrowprops=dict(arrowstyle="->", color="k"))
     ax.axvline(1.0, color=C_GRAY, ls=":", lw=1.2)
-    ax.set_xscale("log")
-    ax.set_xlabel("模型复杂度（如 $d/n$）")
-    ax.set_ylabel("测试误差")
-    ax.set_title("双倍下降：过参数化插值解并非必然糟糕")
-    ax.legend(fontsize=9.5, loc="lower left")
+    ax.set_yscale("log")
+    ax.set_xlabel("模型复杂度 $d/n$")
+    ax.set_ylabel("测试 MSE，$\\|\\hat{\\beta}-\\beta\\|^2+\\sigma^2$（对数轴）")
+    ax.set_title("Double descent 模拟复现（$n=200$，每个 $d$ 取 25 次设计抽样）")
+    ax.legend(fontsize=9.5, loc="upper right")
     ax.grid(alpha=0.25, which="both")
-    save(fig, "ch7_doubledescent.png")
+    save(fig, "ch8_doubledescent.png")
 
 
 # ---------------------------------------------------------------- ch7 FDR 控制
@@ -534,6 +589,6 @@ if __name__ == "__main__":
     ch5_implicit()
     ch6_lassopath()
     ch7_fdr()
-    ch7_kernel()
-    ch7_doubledescent()
+    ch8_kernel()
+    ch8_doubledescent()
     print("ALL DONE")

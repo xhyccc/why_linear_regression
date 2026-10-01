@@ -256,7 +256,7 @@ $D \to \infty$ 时初始化参数 $a_j, \bm{\omega}_j, b_j$ 独立同分布，�
 \[
   \Theta(\bm{z},\bm{z}') = \underbrace{\E\big[\sigma(u)\sigma(u')\big]}_{\text{输出层贡献（= RF 核）}} + (\bm{z}^\top\bm{z}' + 1)\,\E\big[\sigma'(u)\sigma'(u')\big] .
 \]
-两点说明：若\textbf{偏置固定}不训练，则第二项退化为 $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$（题面所给形式即此约定）；若偏置同其他第一层参数一起训练，则内积多出 $1 \times 1$，即 $\bm{z}^\top\bm{z}' + 1$——本题取后者。
+两点说明：若\textbf{偏置固定}不训练，则第二项退化为 $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$；若偏置同其他第一层参数一起训练，则内积多出 $1 \times 1$，即 $\bm{z}^\top\bm{z}' + 1$——题面所给形式对应此约定，本题即取后者。
 
 \textbf{与 RF 核的比较。} RF 核 $k_{\mathrm{RF}}(\bm{z},\bm{z}') = \E[\sigma(u)\sigma(u')]$ 只含输出层贡献；NTK 额外多出导数项，且当 $\bm{z} = \bm{z}'$ 时 $\E[\sigma'(u)^2] > 0$，该项严格为正——故 $\Theta \succeq k_{\mathrm{RF}}$（作为核矩阵），严格强于 RF 核。$\square$
 

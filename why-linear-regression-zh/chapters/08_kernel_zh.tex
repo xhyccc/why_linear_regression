@@ -65,9 +65,9 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ch7_kernel.pdf}
+  \includegraphics[width=\linewidth]{figures/ch8_kernel.pdf}
   \caption{核方法的几何本质：同一份环形数据（按半径分两类），在原始潜空间 $z$（左）里任何直线都分不开；经二次特征映射 $\phi(z)=(z_1^2, z_2^2, \sqrt{2}z_1z_2)$ 升到特征空间（右）后，一个线性函数即可分开。\textbf{对 $x$ 线性 $=$ 对 $z$ 非线性}——线性回归的预测由此成为潜空间中的天然非线性方法。}
-  \label{fig:ch7-kernel}
+  \label{fig:ch8-kernel}
 \end{figure}
 
 \subsection[从核回归到深度网络：Fourier 特征的 ridgeless 回归与 NTK]{从核回归到深度网络：ridgeless 回归、Fourier 特征与神经正切核}\label{sec:ntk}
@@ -140,9 +140,9 @@ NTK 的惊人之处在于其\textbf{宽网络极限}：以 $\tfrac{1}{\sqrt{D}}$
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\linewidth]{figures/ch7_doubledescent.pdf}
-  \caption{双倍下降（示意图；Belkin et al., 2019\cite{belkin2019}）：经典教科书说测试误差在 $d \approx n$ 处最优（蓝，U 型），现代观察发现误差在插值阈值 $d=n$ 处尖峰后\textbf{继续下降}（红）——插值本身不是罪，关键是插值解中隐式正则化选了哪一个。ridgeless 回归与提前停止的 GD 给出了这一选择的线性刻画。}
-  \label{fig:ch7-doubledescent}
+  \includegraphics[width=0.72\linewidth]{figures/ch8_doubledescent.pdf}
+  \caption{双倍下降，模拟复现（Belkin et al., 2019\cite{belkin2019}）：各向同性高斯设计，$n = 200$，$\|\bbeta\|^2 = 1$，$\sigma = 0.5$；测试 MSE $\|\widehat\bbeta - \bbeta\|^2 + \sigma^2$ 对每个 $d$ 取 25 次设计抽样的平均，估计量用第 \ref{sec:highdim}--\ref{sec:gd-underdet} 章的 OLS（$d<n$）/ 最小范数解（$d \ge n$）。风险在 $d \to n$ 过程中上升，在插值阈值 $d=n$ 处尖峰，随后在过参数化区间\textbf{继续下降}（红）——插值本身不是罪，关键是插值解中被选中的是哪一个。验证集调参的 ridge（蓝）则完全没有尖峰。ridgeless 回归与提前停止的 GD 给出了这一选择的线性刻画。}
+  \label{fig:ch8-doubledescent}
 \end{figure}
 
 \begin{exercise}\label{ex:ntk}

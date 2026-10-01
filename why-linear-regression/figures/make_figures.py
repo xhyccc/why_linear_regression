@@ -1,16 +1,29 @@
 #!/usr/bin/env python3
 """Generate all figures for "Why (we still need) linear regression" (English edition).
-Unified style: managed runtime setup_plot, fixed random seed, vector PDF output to figures/.
+Self-contained: reproduces every figure and numerical experiment with a standard
+matplotlib/numpy/scipy install (no private modules required).
+Fixed random seed, vector PDF output to figures/.
 """
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(sys.executable).parent.parent.parent))
-from daimon_runtime import setup_plot
-
-setup_plot()
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
+try:  # preferred house style when the managed runtime happens to be available
+    sys.path.insert(0, str(Path(sys.executable).parent.parent.parent))
+    from daimon_runtime import setup_plot
+    setup_plot()
+except Exception:  # zero-dependency fallback: same figures, stock rcParams
+    plt.rcParams.update({
+        "font.size": 11,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.unicode_minus": False,
+        "figure.dpi": 130,
+    })
 
 OUT = Path(__file__).parent
 rng = np.random.default_rng(20261001)
@@ -352,7 +365,7 @@ def ch6_lassopath():
 
 
 # ---------------------------------------------------------------- ch7 kernel methods
-def ch7_kernel():
+def ch8_kernel():
     # XOR-like nonlinear data + linear separability after feature mapping
     n = 80
     t = rng.uniform(0, 2 * np.pi, n)
@@ -387,34 +400,71 @@ def ch7_kernel():
     ax.set_xlabel("$x_1+x_2=z_1^2+z_2^2$"); ax.set_ylabel(r"$x_3=\sqrt{2}\,z_1z_2$")
     ax.legend(fontsize=9); ax.grid(alpha=0.25)
     fig.tight_layout()
-    save(fig, "ch7_kernel.png")
+    save(fig, "ch8_kernel.png")
 
 
-# ---------------------------------------------------------------- ch7 double descent
-def ch7_doubledescent():
-    g = np.geomspace(0.05, 1.0, 120)
-    g2 = np.geomspace(1.0, 30, 120)
-    # Classical U-shape + interpolation spike + second descent (schematic); the two pieces meet at the threshold
-    u = 0.16 + 0.5 * np.exp(-2.5 * g) + 0.24 * g ** 3
-    peak = 0.9
-    dd = 0.16 + 0.75 / np.sqrt(g2) + 0.02 * np.log(g2)
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
-    ax.plot(g, u, color=C_DATA, lw=2.2, label="Classical bias–variance trade-off")
-    ax.plot([g[-1], 1.0], [u[-1], peak], color=C_DATA, lw=2.2)
-    ax.plot(g2, dd, color=C_FIT, lw=2.2,
-            label="Modern observation: error decreases again past the interpolation threshold (double descent)")
-    ax.plot([1.0], [peak], "^", color="k", ms=10)
+# ---------------------------------------------------------------- ch8 double descent
+def ch8_doubledescent():
+    """Genuine double-descent experiment (not a schematic): isotropic Gaussian design,
+    n fixed, d swept across the interpolation threshold d = n.
+    Estimators: OLS/min-norm ridgeless least squares (SVD form, Chapters 3 and 5)
+    versus ridge with validation-tuned lambda (Chapter 3).
+    Test MSE = ||beta_hat - beta||^2 + sigma^2, exact for isotropic test points,
+    averaged over `reps` design draws."""
+    n = 200
+    sigma = 0.5
+    reps = 25
+    lam_grid = np.logspace(-1, 3.5, 12)
+    dvals = np.unique(np.round(np.concatenate([
+        np.geomspace(0.05, 0.95, 40),
+        np.linspace(0.96, 1.04, 9),
+        np.geomspace(1.06, 8.0, 40),
+    ]) * n).astype(int))
+    dvals = dvals[dvals >= 2]
+    g = dvals / n
+    risk_ls = np.zeros(len(dvals))
+    risk_rg = np.zeros(len(dvals))
+    for i, d in enumerate(dvals):
+        acc_ls = np.empty(reps)
+        acc_rg = np.empty(reps)
+        for r in range(reps):
+            X = rng.standard_normal((n, d))
+            beta = rng.standard_normal(d)
+            beta /= np.linalg.norm(beta)
+            y = X @ beta + sigma * rng.standard_normal(n)
+            Xv = rng.standard_normal((n, d))
+            yv = Xv @ beta + sigma * rng.standard_normal(n)
+            U, s, Vt = np.linalg.svd(X, full_matrices=False)
+            uty = U.T @ y
+            # ridgeless: OLS when d < n, minimum-norm when d >= n (same SVD formula)
+            b_ls = Vt.T @ (uty / s)
+            acc_ls[r] = np.sum((b_ls - beta) ** 2) + sigma ** 2
+            # ridge: lambda tuned by validation MSE on (Xv, yv)
+            coef = (s[:, None] / (s[:, None] ** 2 + lam_grid[None, :])) * uty[:, None]
+            pred = Xv @ (Vt.T @ coef)                       # n x len(lam_grid)
+            mses = np.mean((pred - yv[:, None]) ** 2, axis=0)
+            b_rg = Vt.T @ (coef[:, int(np.argmin(mses))])
+            acc_rg[r] = np.sum((b_rg - beta) ** 2) + sigma ** 2
+        risk_ls[i] = acc_ls.mean()
+        risk_rg[i] = acc_rg.mean()
+    fig, ax = plt.subplots(figsize=(6.6, 4.2))
+    ax.plot(g, risk_ls, color=C_FIT, lw=2.2,
+            label="Ridgeless (OLS $d<n$ / min-norm $d\\geq n$): spike at $d=n$, then descends")
+    ax.plot(g, risk_rg, color=C_DATA, lw=2.2,
+            label="Ridge with validation-tuned $\\lambda$: no spike")
+    k0 = int(np.argmin(np.abs(g - 1.0)))
+    ax.plot([g[k0]], [risk_ls[k0]], "^", color="k", ms=10)
     ax.annotate("Interpolation threshold $d=n$:\ntraining error is exactly zero",
-                xy=(1.0, peak), xytext=(3.2, 0.75), fontsize=10,
-                arrowprops=dict(arrowstyle="->", color="k"))
+                xy=(g[k0], risk_ls[k0]), xytext=(1.7, 120),
+                fontsize=10, arrowprops=dict(arrowstyle="->", color="k"))
     ax.axvline(1.0, color=C_GRAY, ls=":", lw=1.2)
-    ax.set_xscale("log")
-    ax.set_xlabel("Model complexity (e.g., $d/n$)")
-    ax.set_ylabel("Test error")
-    ax.set_title("Double descent: overparameterized interpolating solutions are not necessarily bad")
-    ax.legend(fontsize=9.5, loc="lower left")
+    ax.set_yscale("log")
+    ax.set_xlabel("Model complexity $d/n$")
+    ax.set_ylabel("Test MSE,  $\\|\\hat{\\beta}-\\beta\\|^2+\\sigma^2$ (log scale)")
+    ax.set_title("Double descent, reproduced by simulation ($n=200$, 25 design draws per $d$)")
+    ax.legend(fontsize=9.5, loc="upper right")
     ax.grid(alpha=0.25, which="both")
-    save(fig, "ch7_doubledescent.png")
+    save(fig, "ch8_doubledescent.png")
 
 
 # ---------------------------------------------------------------- ch7 FDR control
@@ -534,6 +584,6 @@ if __name__ == "__main__":
     ch5_implicit()
     ch6_lassopath()
     ch7_fdr()
-    ch7_kernel()
-    ch7_doubledescent()
+    ch8_kernel()
+    ch8_doubledescent()
     print("ALL DONE")

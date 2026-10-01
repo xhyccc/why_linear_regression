@@ -144,6 +144,7 @@ $\max_j |1 - \eta\lambda_j| = \max\{|1 - \eta\lambda_{\min}|, |1 - \eta\lambda_{
 \subsection{与闭式解的对照表}
 
 \begin{center}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
  & 闭式解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$ & 梯度下降 \eqref{eq:gd} \\
@@ -154,7 +155,7 @@ $\max_j |1 - \eta\lambda_j| = \max\{|1 - \eta\lambda_{\min}|, |1 - \eta\lambda_{
 病态 $\kappa \gg 1$ & 数值不稳定（条件数平方） & 收敛极慢（同样的 $\kappa$，不同的病法） \\
 与 $\bhat$ 的关系 & 就是它 & 不动点即 $\bhat$；$\widehat{\bbeta}_t$ 有精确解 \eqref{eq:gd-exact} \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{center}
 
 \begin{keybox}[本章要点]

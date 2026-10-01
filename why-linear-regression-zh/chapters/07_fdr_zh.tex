@@ -64,6 +64,7 @@ Abramovich、Benjamini、Donoho 与 Johnstone（2006）把这层观察变成了�
 
 与第 \ref{sec:ggm-estimate} 节并排看，同一张面孔出现了两次：
 \begin{center}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
  & 稀疏估计（第 6 章） & FDR 检验（本节） \\
@@ -73,7 +74,7 @@ Abramovich、Benjamini、Donoho 与 Johnstone（2006）把这层观察变成了�
 自适应来源 & 惩罚参数 $\lambda$ 由交叉验证或 BIC & 截断点由斜线交叉自动定位 \\
 稀疏性的角色 & 使估计在 $d \gg n$ 下仍可能 & 使 BH 阈值自动降到信号层 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{center}
 \textbf{控制假发现率不是估计之外的补丁，而是稀疏性假设在检验问题上的对偶表述}：「大多数系数是零」既让 lasso 能估计，也让 BH 能自适应地找到阈值。Donoho 的名字在第 6 章（压缩感知传统）与本节各出现一次，不是巧合——这是同一条「稀疏性 $\Rightarrow$ 阈值 $\Rightarrow$ 最优性」逻辑链的两端。
 
@@ -96,7 +97,7 @@ Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\text
 \[
   W_j = Z_j - \tilde{Z}_j ,
 \]
-约定 $W_j$ 的符号表示「原变量胜过影子」。关键观察：在 $H_{0j}$（$\x_j$ 与 $\y$ 无关）下，$\x_j$ 与影子毫无差别，交换性给出
+约定 $W_j$ 的符号表示「原变量胜过影子」。\footnote{口径注记：原始 Barber--Candès 论文使用绝对值统计量 $|Z_j| - |\tilde{Z}_j|$；$(Z_j, \tilde{Z}_j)$ 的\underline{任意}反对称组合都享有同样的变号性质 \eqref{eq:knockoff-sym}，上文的有符号差是其中最简单的一种。}关键观察：在 $H_{0j}$（$\x_j$ 与 $\y$ 无关）下，$\x_j$ 与影子毫无差别，交换性给出
 \begin{equation}\label{eq:knockoff-sym}
   W_j \ \overset{d}{=}\ -W_j
   \qquad (H_{0j} \text{ 下，以其他变量为条件}),
@@ -114,6 +115,7 @@ Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\text
 
 两条路线并排看，各司其职：
 \begin{center}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
  & BH + debiased lasso（第 \ref{sec:fdr-regression} 节） & Knockoffs（本节） \\
@@ -123,7 +125,7 @@ Barber 与 Candès（2015）换了一条更彻底的路\cite{barber2015}：\text
 有限样本保证 & 近似（渐近成立） & \textbf{精确}（有限样本） \\
 额外代价 & debias 需要的 nodewise 估计 & 构造影子变量（固定-$X$ 构造需 $n \ge 2d$；model-X 需已知或可估特征分布） \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{center}
 
 至此，「可信的科学断言」三件套齐备：debiased lasso 给\textbf{单个}系数的 $p$ 值（第 \ref{sec:debiased} 节），BH 给\textbf{一页} $p$ 值的 FDR 控制（本节之前），knockoffs 给\textbf{变量选择}的、模型无关的 FDR 控制（本节）。Candès 与 Donoho 在前言里被致敬，是因为回归的现代可信度理论恰好由他们两脉写成——一个负责「稀疏使估计可能」，一个负责「对称使推断可信」。

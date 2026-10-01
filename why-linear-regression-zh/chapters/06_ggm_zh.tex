@@ -69,7 +69,7 @@
 
 \begin{enumerate}[label=(\alph*)]
   \item \textbf{删边}：对每对变量搜索条件集 $S$，一旦检验出 $i \perp j \mid S$ 就在 $i,j$ 间删去无向边——共同原因与间接路径在这条检验现形（这正是 Reichenbach 原理 \cite{reichenbach1956} 的可操作版本）；
-  \item \textbf{定向}：对 $i - k - j$ 且 $i, j$ 不相邻的结构（v-结构），在 Markov + faithfulness 假设下可定向 $i \to k \leftarrow j$——\textbf{数据本身对一部分箭头给出了方向}；
+  \item \textbf{定向}：对 $i - k - j$ 且 $i, j$ 不相邻的结构（v-结构），在 Markov + faithfulness 假设下可定向 $i \to k \leftarrow j$——\textbf{数据本身对一部分箭头给出了方向}（Markov：图上无边的变量对，在给定其余变量时独立；faithfulness：不存在未被图结构蕴含的「巧合」条件独立——两条合起来保证图与分布互相唯一决定）；
   \item \textbf{传播}：Meek 规则把方向沿图继续传播。
 \end{enumerate}
 

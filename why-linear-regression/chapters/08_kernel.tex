@@ -69,9 +69,9 @@ This is the kernel form of the $(\phi(\bm{Z})^\top\phi(\bm{Z}))^{-1}$ from the o
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ch7_kernel.pdf}
+  \includegraphics[width=\linewidth]{figures/ch8_kernel.pdf}
   \caption{The geometric essence of kernel methods: the same ring-shaped data (two classes by radius) cannot be separated by any straight line in the original latent space $z$ (left); lifted by the quadratic feature map $\phi(z)=(z_1^2, z_2^2, \sqrt{2}z_1z_2)$ into feature space (right), a single linear function separates them. \textbf{Linear in $x$ $=$ nonlinear in $z$} --- and hence the prediction of linear regression becomes a natural nonlinear method in latent space.}
-  \label{fig:ch7-kernel}
+  \label{fig:ch8-kernel}
 \end{figure}
 
 \subsection[From kernel regression to deep networks: ridgeless regression, Fourier features, and the NTK]{From kernel regression to deep networks: ridgeless regression, Fourier features, and the neural tangent kernel}\label{sec:ntk}
@@ -144,9 +144,9 @@ Two pragmatic remarks. First, the NTK describes the \textit{lazy training} regim
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\linewidth]{figures/ch7_doubledescent.pdf}
-  \caption{Double descent (schematic; Belkin et al., 2019\cite{belkin2019}): classical textbooks say test error is optimal near $d \approx n$ (blue, U-shape); modern observation shows the error spikes at the interpolation threshold $d=n$ and then \textbf{keeps decreasing} (red) --- interpolation itself is no sin; what matters is \emph{which} interpolating solution implicit regularization selects. Ridgeless regression and early-stopped GD give the linear account of this selection.}
-  \label{fig:ch7-doubledescent}
+  \includegraphics[width=0.72\linewidth]{figures/ch8_doubledescent.pdf}
+  \caption{Double descent, reproduced by simulation (Belkin et al., 2019\cite{belkin2019}): isotropic Gaussian design with $n = 200$, $\|\bbeta\|^2 = 1$, $\sigma = 0.5$; the test MSE $\|\widehat\bbeta - \bbeta\|^2 + \sigma^2$ is averaged over 25 design draws per $d$, using the OLS ($d<n$) / minimum-norm ($d \ge n$) solution of Chapters~\ref{sec:highdim}--\ref{sec:gd-underdet}. The risk grows as $d \to n$ from below, spikes at the interpolation threshold $d=n$, and then \textbf{keeps decreasing} in the overparameterized regime (red) --- interpolation itself is no sin; what matters is \emph{which} interpolating solution is selected. Ridge with validation-tuned $\lambda$ (blue) avoids the spike altogether. Ridgeless regression and early-stopped GD give the linear account of this selection.}
+  \label{fig:ch8-doubledescent}
 \end{figure}
 
 \begin{exercise}\label{ex:ntk}
