@@ -55,7 +55,7 @@ python make_figures.py
 预编译好的 PDF：
 
 - [中文版 main.pdf](why-linear-regression-zh/main.pdf)（54 页）
-- [英文版 main.pdf](why-linear-regression/main.pdf)（58 页）
+- [英文版 main.pdf](why-linear-regression/main.pdf)（59 页）
 
 ## 写作说明（诚实声明）
 

@@ -51,7 +51,7 @@ cd figures && python make_figures.py
 
 Prebuilt PDFs:
 
-- [English edition — main.pdf](why-linear-regression/main.pdf) (58 pages)
+- [English edition — main.pdf](why-linear-regression/main.pdf) (59 pages)
 - [Chinese edition — main.pdf](why-linear-regression-zh/main.pdf) (54 pages)
 
 ## A note on how this book was written
