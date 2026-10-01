@@ -45,7 +45,7 @@ cd why-linear-regression-zh   # 或 why-linear-regression
 latexmk -xelatex -interaction=nonstopmode main.tex
 ```
 
-重新生成插图：
+重新生成插图——书中的全部数值实验（梯度下降轨迹、double descent、FDR 曲线等）也由这个脚本复现：
 
 ```bash
 cd figures

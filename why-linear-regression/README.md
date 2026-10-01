@@ -40,7 +40,7 @@ latexmk -xelatex -interaction=nonstopmode main.tex
 
 Requires XeLaTeX (for the CJK author names) and standard TeX Live packages (xeCJK, amsmath, tcolorbox, hyperref).
 
-Regenerate the figures:
+Regenerate the figures (this also reproduces every numerical experiment shown in the book):
 
 ```bash
 cd figures && python make_figures.py

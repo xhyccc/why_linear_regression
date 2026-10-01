@@ -24,7 +24,7 @@
 latexmk -xelatex -interaction=nonstopmode main.tex
 ```
 
-重新生成插图：
+重新生成插图（书中的全部数值实验也由这个脚本复现）：
 
 ```bash
 cd figures && python make_figures.py

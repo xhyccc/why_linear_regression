@@ -43,7 +43,7 @@ cd why-linear-regression-zh   # or why-linear-regression
 latexmk -xelatex -interaction=nonstopmode main.tex
 ```
 
-Regenerate the figures:
+Regenerate the figures — this also reproduces every numerical experiment in the book (gradient-descent trajectories, double descent, FDR curves, etc.):
 
 ```bash
 cd figures && python make_figures.py
