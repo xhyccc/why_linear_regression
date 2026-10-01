@@ -1,0 +1,301 @@
+% 习题解答（附录 A）
+\appendix
+\section{习题解答}\label{sec:solutions}
+
+\subsection{第 3 章：高维线性回归}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:gm}（Gauss--Markov 补证）]
+\textbf{第一步（无偏 $\Rightarrow$ 线性约束）。} $\E[\tilde{\bbeta}] = \bm{A}\X\bbeta = \bbeta$ 对一切 $\bbeta$ 成立，故 $\bm{A}\X = \bm{I}$。取 $\bm{B} = (\X^\top\X)^{-1}\X^\top$（即 OLS 的系数矩阵，$\bm{B}\X = \bm{I}$），令 $\bm{D} := \bm{A} - \bm{B}$，则
+\[
+  \bm{D}\X = \bm{A}\X - \bm{B}\X = \bm{I} - \bm{I} = \zero .
+\]
+反过来，任取满足 $\bm{D}\X = \zero$ 的 $\bm{D}$，$(\bm{B}+\bm{D})\y$ 都无偏——所以「无偏的线性估计」与「OLS 加一个零空间方向的扰动」是同一族对象。
+
+\textbf{第二步（方差比较）。} 由 $\Var(\bm{\varepsilon}) = \sigma^2\bm{I}$，
+\[
+  \Var(\tilde{\bbeta}) = \sigma^2 (\bm{B}+\bm{D})(\bm{B}+\bm{D})^\top
+  = \sigma^2\bm{B}\bm{B}^\top + \sigma^2\big(\bm{B}\bm{D}^\top + \bm{D}\bm{B}^\top\big) + \sigma^2\bm{D}\bm{D}^\top .
+\]
+交叉项消失：$\bm{D}\bm{B}^\top = \bm{D}\X(\X^\top\X)^{-1} = \zero$，转置得 $\bm{B}\bm{D}^\top = \zero$。于是
+\[
+  \Var(\tilde{\bbeta}) - \Var(\bhat) = \sigma^2\,\bm{D}\bm{D}^\top \succeq \zero,
+\]
+因为任意 $\bm{v}$ 有 $\bm{v}^\top \bm{D}\bm{D}^\top \bm{v} = \norm{\bm{D}^\top \bm{v}}^2 \ge 0$。等号对一切 $\bm{v}$ 成立当且仅当 $\bm{D} = \zero$，即 $\tilde{\bbeta} = \bhat$。$\square$
+
+\item[练习 \ref{ex:ridge-bias}（岭回归的偏差）]
+一阶条件：$(\X^\top\X + \lambda\bm{I})\,\bhat^{\mathrm{ridge}} = \X^\top\y$，即 $\bhat^{\mathrm{ridge}} = (\X^\top\X + \lambda\bm{I})^{-1}\X^\top\y$（注意 $\X^\top\X + \lambda\bm{I}$ 对任意 $\lambda > 0$ 正定，无需满秩）。取期望并用 $\E[\y] = \X\bbeta$：
+\[
+\begin{aligned}
+  \E\big[\bhat^{\mathrm{ridge}}\big]
+  &= (\X^\top\X + \lambda\bm{I})^{-1}\X^\top\X\,\bbeta \\
+  &= \bbeta - \lambda\,(\X^\top\X + \lambda\bm{I})^{-1}\bbeta ,
+\end{aligned}
+\]
+第二步把 $\X^\top\X$ 拆成 $(\X^\top\X + \lambda\bm{I}) - \lambda\bm{I}$，使逆矩阵与自身相消。
+故偏差 $= -\lambda(\X^\top\X + \lambda\bm{I})^{-1}\bbeta$：方向被「拉向原点」，幅度被 $1/(\text{特征值}+\lambda)$ 逐方向折扣——与正文 SVD 分析一致。$\square$
+\end{description}
+
+\subsection{第 4 章：Gradient Descent 优化视角}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:gd-rate}（最优步长下的收敛界）]
+记 $\bm{A} = \bm{I} - \eta\X^\top\X$。由 \eqref{eq:gd-exact} 与 $\widehat{\bbeta}_0 = \zero$：
+\[
+  \widehat{\bbeta}_t - \bhat = \bm{A}^t\big(\zero - \bhat\big) = -\bm{A}^t \bhat .
+\]
+$\bm{A}$ 是对称矩阵，故 $\norm{\bm{A}^t}_2 = \norm{\bm{A}}_2^t = \big(\max_j |1 - \eta\lambda_j|\big)^t$。代入 $\eta = \eta^\star$（推论 \ref{thm:gd-opt}），$\max_j|1 - \eta^\star\lambda_j| = \dfrac{\kappa - 1}{\kappa + 1} =: \rho^\star$，于是
+\[
+  \norm{\widehat{\bbeta}_t - \bhat} \le \big(\tfrac{\kappa-1}{\kappa+1}\big)^t \norm{\bhat}.
+\]
+要达到 $\norm{\widehat{\bbeta}_t - \bhat} \le \varepsilon$，需 $(\rho^\star)^t \le \varepsilon / \norm{\bhat}$，即
+\[
+  t \;\ge\; \frac{\log\!\big(\norm{\bhat}/\varepsilon\big)}{\log\!\big(1/\rho^\star\big)} .
+\]
+当 $\kappa \gg 1$，$\log\frac{1}{\rho^\star} = \log\frac{\kappa+1}{\kappa-1} \approx \frac{2}{\kappa}$，故 $t = O\big(\kappa \log\!\frac{\norm{\bhat}}{\varepsilon}\big)$：所需步数与条件数\textbf{线性}成正比。$\square$
+
+\item[练习 \ref{ex:neumann}（Neumann 恒等式）]
+记 $\bm{A} = \bm{I} - \eta\X^\top\X$，则 $\eta\X^\top\X = \bm{I} - \bm{A}$，且由正规方程 $\X^\top\X\,\bhat = \X^\top\y$。利用几何级数恒等式 $\bm{I} - \bm{A}^t = (\bm{I}-\bm{A})\sum_{k=0}^{t-1}\bm{A}^k$（两边展开相消即得，无需任何收敛性）：
+\[
+  \big[\bm{I} - \bm{A}^t\big]\bhat
+  = \eta\,\X^\top\X \sum_{k=0}^{t-1}\bm{A}^k\,\bhat
+  = \eta \sum_{k=0}^{t-1}\bm{A}^k\,\X^\top\y ,
+\]
+最后一步把 $\X^\top\X$ 与 $\bhat$ 相邻合并为 $\X^\top\y$。左边正是 \eqref{eq:gd-exact-zero} 的左乘形式 $\widehat{\bbeta}_t = [\bm{I} - \bm{A}^t]\bhat$——GD 的 $t$ 步解恒等于「用 $t$ 次部分和逼近逆矩阵」作用于 $\bhat$。注意此恒等式对每个有限的 $t$ 精确成立，与 $\eta$ 大小无关；收敛性（$\bm{A}^t \to \zero$）才需要 $0 < \eta < 2/\lambda_{\max}$。$\square$
+\end{description}
+
+\subsection{第 5 章：欠定情形与隐式正则化}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:ridge-dual}（ridge 的原始--对偶恒等式与零极限）]
+\textbf{恒等式。} 两边同左乘 $(\X^\top\X + \lambda\bm{I})$：
+\[
+  (\X^\top\X + \lambda\bm{I})\,\X^\top(\X\X^\top + \lambda\bm{I})^{-1}
+  = \X^\top(\X\X^\top + \lambda\bm{I})\,(\X\X^\top + \lambda\bm{I})^{-1}
+  = \X^\top ,
+\]
+（第一步用到 $(\X^\top\X + \lambda\bm{I})\X^\top = \X^\top\X\X^\top + \lambda\X^\top = \X^\top(\X\X^\top + \lambda\bm{I})$，即矩阵乘法分配律。）
+等于左边的 $\X^\top$，故恒等式成立（两边矩阵都良定义，因 $\X^\top\X + \lambda\bm{I}$ 与 $\X\X^\top + \lambda\bm{I}$ 对 $\lambda > 0$ 恒正定）。
+
+\textbf{零极限。} 代入 SVD $\X = \bm{U}\bm{\Sigma}\bm{V}^\top$（$s_j$ 为奇异值），恒等式两边作用在 $\y$ 上给出的第 $j$ 个谱分量为
+\[
+  \frac{s_j}{s_j^2 + \lambda}\,(\bm{U}^\top\y)_j \;\xrightarrow[\lambda \to 0^+]{}\; \begin{cases} \dfrac{1}{s_j}(\bm{U}^\top\y)_j, & s_j > 0, \\[1ex] 0, & s_j = 0, \end{cases}
+\]
+右端正是 $\bm{V}\bm{\Sigma}^{+}\bm{U}^\top\y = \X^+\y$。全程未用满秩假设——这是「ridge 零极限 $=$ 伪逆解」的直接证明，也是 push-through 恒等式 \eqref{eq:push-through} 的特例。$\square$
+
+\item[练习 \ref{ex:gd-limit-anyinit}（任意初值的 GD 极限）]
+迭代 \eqref{eq:gd} 的通解（对线性迭代直接归纳）：
+\[
+  \widehat{\bbeta}_t = \bm{A}^t \widehat{\bbeta}_0 + \eta \sum_{k=0}^{t-1} \bm{A}^k \X^\top\y, \qquad \bm{A} = \bm{I} - \eta\X^\top\X .
+\]
+\textbf{第一项。} $\bm{A}$ 在 $\mathcal{N}(\X)$ 上为恒等、在 $\mathrm{row}(\X)$ 上谱半径 $< 1$（$0 < \eta < 2/\lambda_{\max}(\X\X^\top)$），故 $\bm{A}^t \to \bm{P}_{\mathcal{N}(\X)} = \bm{I} - \X^+\X$（到零空间的正交投影）。
+
+\textbf{第二项。} 同定理 \ref{thm:gd-exact-underdet} 的证明：$\eta\sum_{k<t}\bm{A}^k\X^\top \to \X^\top(\X\X^\top)^{-1}$，即 $\widehat{\bbeta}'$。
+
+\textbf{合并。} $\lim_t \widehat{\bbeta}_t = \widehat{\bbeta}' + \bm{P}_{\mathcal{N}(\X)}\widehat{\bbeta}_0$。初值的零空间分量被一路携带（第 \ref{sec:stability} 节的「零空间中性」），行空间分量收敛到流形上的最近点。$\widehat{\bbeta}_0 = \zero$ 时 $\bm{P}_{\mathcal{N}(\X)}\zero = \zero$，即退化为定理 \ref{thm:gd-exact-underdet}——两者完全一致。$\square$
+
+\item[练习 \ref{ex:spectrum}（$\X^\top\X$ 与 $\X\X^\top$ 的非零谱同一）]
+设 $\X^\top\X\,\bm{v} = \lambda\,\bm{v}$，$\lambda \neq 0$，$\bm{v} \neq \zero$。先证 $\bm{w} := \X\bm{v} \neq \zero$：若 $\X\bm{v} = \zero$ 则 $\lambda\bm{v} = \X^\top\X\bm{v} = \zero$，与 $\lambda \neq 0$、$\bm{v} \neq \zero$ 矛盾。于是
+\[
+  (\X\X^\top)\,\bm{w} = \X\big(\X^\top\X\bm{v}\big) = \lambda\,\X\bm{v} = \lambda\,\bm{w},
+\]
+即 $\bm{w}$ 是 $\X\X^\top$ 属于 $\lambda$ 的特征向量。反向把 $\X$ 与 $\X^\top$ 对调即得。映射 $\bm{v} \mapsto \X\bm{v}$ 在特征空间之间是一一对应的（不同特征值的特征向量互不混淆），故\textbf{非零特征值及其重数完全相同}；零特征值的个数分别为 $d - r$ 与 $n - r$（$r = \rank(\X)$），可以不同。
+
+由于 GD 的衰减因子 $1 - \eta\lambda_j$ 只作用于非零谱，两个 regime 的收敛率公式只依赖 $\X^\top\X$ 与 $\X\X^\top$ 共同的那 $r$ 个特征值——这就是「$d$ 个公式」与「$n$ 个公式」可以互换的代数原因：有效维数都是 $r$。$\square$
+\end{description}
+
+\subsection{第 6 章：从估计到推断}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:block-inv}（分块求逆三部曲）]
+记 $\bm{\Sigma} = \begin{pmatrix} s & \bm{c}^\top \\ \bm{c} & \bm{S} \end{pmatrix}$（$s = \Sigma_{yy}$，$\bm{c} = \bm{\Sigma}_{Xy}$，$\bm{S} = \bm{\Sigma}_{XX}$，均已假设可逆部分可逆）。
+
+\textbf{(i) 条件分布。} 对联合高斯做线性变换 $y \mapsto y - \bm{c}^\top\bm{S}^{-1}\x$ 消去交叉项，立得
+\[
+  y \mid \X \sim \mathcal{N}\big( \bm{c}^\top\bm{S}^{-1}\x,\ s - \bm{c}^\top\bm{S}^{-1}\bm{c} \big).
+\]
+
+\textbf{(ii) 精度分块。} 由 $\bm{\Theta}\bm{\Sigma} = \bm{I}$ 按块展开四个方程，或用 Schur 补求逆公式：
+\[
+  \Theta_{yy} = \frac{1}{s - \bm{c}^\top\bm{S}^{-1}\bm{c}}, \qquad
+  \bm{\Theta}_{Xy} = -\bm{S}^{-1}\bm{c}\,\Theta_{yy}.
+\]
+与 (i) 对照即得 \eqref{eq:beta-theta}：$\bbeta = \bm{S}^{-1}\bm{c} = -\bm{\Theta}_{Xy}/\Theta_{yy}$，$\Var(\varepsilon) = s - \bm{c}^\top\bm{S}^{-1}\bm{c} = 1/\Theta_{yy}$。
+
+\textbf{(iii) 偏相关。} 对 $\bm{\Theta}$ 自身做同样的分块（固定指标 $i, j$，其余为一块），$i,j$ 的二维 Schur 补的相关系数即偏相关：
+$\rho_{ij\cdot V\setminus\{i,j\}} = -\Theta_{ij}/\sqrt{\Theta_{ii}\Theta_{jj}}$。
+特别地 $\Theta_{ij} = 0$ 当且仅当该偏相关为零，再由 (ii) 的论证（对变量 $i$ 而非 $y$ 重复一遍）等价于 $i \perp j \mid$ 其余。$\square$
+
+\item[练习 \ref{ex:debiased}（去偏估计的误差分解）]
+由模型 $\y = \X\bbeta + \bm{\varepsilon}$，残差 $\y - \X\widehat{\bbeta}_{\mathrm{lasso}} = \X(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}) + \bm{\varepsilon}$。代入 \eqref{eq:debiased} 并用 $\bm{S} = \X^\top\X/n$：
+\begin{align*}
+  \widetilde{\bbeta}
+  &= \widehat{\bbeta}_{\mathrm{lasso}} + \tfrac{1}{n}\widehat{\bm{\Theta}}\X^\top\bm{\varepsilon} + \widehat{\bm{\Theta}}\bm{S}\big(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}\big) \\
+  &= \bbeta + \underbrace{\tfrac{1}{n}\widehat{\bm{\Theta}}\X^\top\bm{\varepsilon}}_{\text{噪声（方差）}} + \underbrace{\big(\widehat{\bm{\Theta}}\bm{S} - \bm{I}\big)\big(\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}\big)}_{\text{残余（偏差）}},
+\end{align*}
+其中第二步用了 $\widehat{\bbeta}_{\mathrm{lasso}} = \bbeta - (\bbeta - \widehat{\bbeta}_{\mathrm{lasso}})$ 的恒等拆分。
+
+\textbf{第一项为何是「方差」。} 它是均值为零的独立和 $\frac{1}{n}\sum_i \widehat{\bm{\Theta}}\x_i\,\varepsilon_i$；条件于 $\X$（从而条件于 $\widehat{\bm{\Theta}}$），各项方差为 $\frac{\sigma^2}{n}\cdot\frac{1}{n}\widehat{\bm{\Theta}}\X^\top\X\widehat{\bm{\Theta}}^\top \approx \frac{\sigma^2}{n}\,\bm{\Theta}\bm{\Sigma}\bm{\Theta}$（用到 $\widehat{\bm{\Theta}}\bm{S} \approx \bm{I}$），中心极限定理给出渐近正态 \eqref{eq:asym-norm}。它\textit{统计自噪声}，不依赖 $\widehat{\bbeta}_{\mathrm{lasso}}$ 离 $\bbeta$ 多远。
+
+\textbf{第二项为何是「偏差」。} 写成分量：第 $j$ 个分量的绝对值不超过 $\norm{\widehat{\bm{\Theta}}\bm{S} - \bm{I}}_{\max} \cdot \norm{\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}}_1$。nodewise lasso 或 CLIME 的构造保证 $\norm{\widehat{\bm{\Theta}}\bm{S}}_{\max} = O_p(\lambda_n)$，$\lambda_n \asymp \sqrt{\log d / n}$；lasso 的 $\ell_1$ 误差在 $s$-稀疏下有 $\norm{\bbeta - \widehat{\bbeta}_{\mathrm{lasso}}}_1 = O_p(s\lambda_n)$。乘积为 $O_p(s\lambda_n^2) = O_p\big(s\log d / n\big) = o_p(n^{-1/2})$（当 $s\log d = o(\sqrt{n})$）。于是偏差项比噪声项低一个数量级，渐近正态性得证——debias 的本质是用 $\widehat{\bm{\Theta}}$ 把收缩偏差「投影出来」。$\square$
+
+\item[练习 \ref{ex:glasso-clime}（讨论要点）]
+graphical lasso 的最优性条件 $\bm{S} - \bm{\Theta}^{-1} + \lambda\bm{\Gamma} = \zero$ 对 $\bm{\Theta}$ 是\textit{非线性}的（含 $\bm{\Theta}^{-1}$），且整个迭代必须维持在 $\bm{\Theta} \succ \zero$ 的锥内；当 $d \gg n$、$\bm{S}$ 高度病态时，$\bm{\Theta}^{-1}$ 的浮点求值会把 $\bm{S}$ 的病态\textbf{二次放大}，优化问题的条件数恶化。CLIME 把「$\bm{\Theta}$ 是 $\bm{S}$ 之逆」改写为线性约束 $\bm{S}\bm{\Theta} - \bm{I} \approx \zero$，病态只以一次矩阵乘法进入问题，几何上是多面体上的线性规划：更良态、无 PD 约束、无需 $\log\det$ 求导。CLIME 逐列 LP 结构的实际好处：($i$) $d$ 列完全独立，天然并行；($ii$) 每列是一个标准 LP，可直接调用任意成熟求解器，无需实现 glasso 的块坐标下降；($iii$) 允许 $\bm{\Sigma}$ 本身不稀疏、只有 $\bm{\Theta}$ 稀疏的场景（似然方法在该场景效率证明更曲折）。代价：CLIME 丢弃了似然的统计效率，有限样本下常比 glasso 略保守。$\square$
+\end{description}
+
+\subsection{第 7 章：规模化推断与 FDR 控制}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:bh-hand}（手算 BH）]
+阈值 $qk/m = 0.02\,k$：$k=1{:}\ 0.02$（$0.001 \le 0.02$，通过）；$k=2{:}\ 0.04$（$0.02 \le 0.04$，通过）；$k=3{:}\ 0.06$（$0.04 \le 0.06$，通过）；$k=4{:}\ 0.08$（$0.09 > 0.08$，不通过）；$k=5{:}\ 0.10$（$0.3 > 0.10$，不通过）。故 $\hat{k} = 3$，BH 拒绝 $\{1, 2, 3\}$。
+
+三方对比：Bonferroni 阈值 $q/m = 0.02$，只拒绝 $\{1\}$——它漏掉了两个本可认定的发现；逐个检验（水平 $q=0.1$）拒绝 $\{1,2,3,4\}$——$p=0.09$ 的第四个假设在无保护下被拒，而它很可能是零假设（$m=5$ 时全零情形下出现 $p \le 0.1$ 的概率约 $40\%$）。BH 恰在中间：比 Bonferroni 多发现两个，比裸检验少冒险一个。注意 $0.09 < q$ 却依然被 BH 拒绝之外——\textbf{BH 不是「用 $qk/m$ 替代 $\alpha$ 的逐个检验」，斜线在第 4 个点上已收得比 $p$ 值更紧}。$\square$
+
+\item[练习 \ref{ex:bh-bonf}（FDR 与 FWER；两条程序的包含关系）]
+\textbf{(a)} 逐样本地看比值：若 $V = 0$，则 $V/\max(R,1) = 0$；若 $V \ge 1$，则 $V/\max(R,1) \le 1 = \ind{V \ge 1}$。取期望得
+\[
+  \mathrm{FDR} = \E\Big[\frac{V}{\max(R,1)}\Big] \le \E\big[\ind{V \ge 1}\big] = \Prob(V \ge 1) = \mathrm{FWER}.
+\]
+所以任何 FWER 受控于 $\alpha$ 的程序（Bonferroni、Holm 等）自动满足 $\mathrm{FDR} \le \alpha$——只是通常远过保守。
+
+\textbf{(b)} Bonferroni（水平 $q$）拒绝的集合是 $\{ j : p_j \le q/m \}$。设其中某个 $p_j = p_{(i)}$，则 $p_{(i)} \le q/m \le q i/m$（因 $i \ge 1$），即 $i$ 满足 \eqref{eq:bh} 的交叉条件，故 $i \le \hat{k}$，第 $i$ 个被 BH 拒绝。于是 Bonferroni 拒绝集 $\subseteq$ BH 拒绝集；当 $\hat{k} \ge 2$ 时是真子集。
+
+\textbf{(c)} Bonferroni 的单检验阈值：双侧 $q/m = 5\times 10^{-7}$，对应 $|z| > z_{1-2.5\times10^{-7}} \approx 5.17$。单个信号（$z_j \sim \mathcal{N}(5,1)$）的功效
+\[
+  \Prob(|z_j| > 5.17) = \Phi(5 - 5.17) + \Phi(-5 - 5.17) \approx \Phi(-0.17) \approx 0.43 .
+\]
+期望拒绝约 $200 \times 0.43 \approx 86$ 个——功效被压到四成，且随 $m$ 继续增大、固定信号强度时进一步塌缩。
+
+BH：信号的 $p$ 值集中在 $2\Phi(-5) \approx 5.7\times 10^{-7}$ 附近，比阈值小三个数量级。取 $\hat{k} \approx 210$（200 个信号 + 约 10 个混进来的零假设 $p$ 值），阈值 $q\hat{k}/m = 0.05 \times 210 / 10^5 \approx 1.05 \times 10^{-4}$，是 Bonferroni 阈值的 $\hat{k} \approx 210$ 倍；信号全部通过，功效 $\to 1$。验证假发现比例：被拒的约 $210$ 个中约有 $10$ 个假的，$10/210 \approx 4.8\% \le q = 5\%$——与定理 \ref{thm:bh} 一致。$\square$
+
+\item[练习 \ref{ex:bh-proof}（全零独立情形 $\mathrm{FDR} \le q$ 的归纳证明）]
+记 $P_m(q) = \Prob\big( \exists k \le m : p_{(k)} \le qk/m \big)$（$p_j$ iid $U(0,1)$）。\textbf{归纳基础} $m=1$：$P_1(q) = \Prob(p_1 \le q) = q$。
+
+\textbf{归纳步}：设命题对 $m-1$ 成立。以最大值 $U := p_{(m)}$ 的条件分布分两支，$U$ 的密度为 $m u^{m-1}$。
+
+\textit{支一：$U \le q$。} 此时 $k=m$ 自动满足交叉条件（$U \le q = qm/m$），事件必然成立，贡献
+\[
+  \int_0^q 1 \cdot m u^{m-1}\, du = q^{m}.
+\]
+
+\textit{支二：$U = u > q$。} 关键事实：固定 $U = u$ 时，其余 $m-1$ 个变量 iid $U(0, u)$，即 $p_{(k)} = u\, q_{(k)}$（$k < m$），$q_{(k)}$ 是 $m-1$ 个均匀变量的次序统计量。于是
+\[
+  p_{(k)} \le \frac{qk}{m}
+  \iff q_{(k)} \le \frac{q k}{m u}
+  = \frac{q'\, k}{m-1},
+  \qquad q' := \frac{q(m-1)}{m u}.
+\]
+由归纳假设（应用于 $m-1$ 个 iid 均匀、水平 $q'$；$q' > 1$ 时结论平凡成立），该支条件概率 $\le q' = q(m-1)/(mu)$，贡献
+\[
+  \int_q^1 \frac{q(m-1)}{m u}\, m u^{m-1}\, du
+  = q(m-1) \int_q^1 u^{m-2}\, du
+  = q\,(1 - q^{m-1}).
+\]
+
+\textbf{合并}：$P_m(q) \le q^m + q(1 - q^{m-1}) = q$。归纳完成。$\square$
+
+（注：一般 $m_0 < m$ 的情形用「以非零假设的 $p$ 值为条件 + 非降相依（PRDS）」的技巧把问题归约到全零；Benjamini--Hochberg 原文与 Benjamini--Yekutieli (2001) 给出完整论证。）
+
+\item[练习 \ref{ex:knockoff}（交换性论证）]
+\textbf{(a)} 记增广设计 $\bm{A} = [\X\ \tilde{\X}] \in \R^{n \times 2d}$。knockoff 的构造性质正是：对任意 $j$，把 $\bm{A}$ 的第 $j$ 列与第 $d+j$ 列交换后，$\bm{A}$ 的联合分布不变。在 $H_{0j}$ 下 $\y$ 不依赖 $\x_j$（$\y \perp \x_j \mid \x_{-j}$），故交换不改变 $(\bm{A}, \y)$ 的联合分布，从而不改变由它们算出的任何统计量的分布。理想化的重要性统计量满足\textbf{交换等变性}：在上述交换下 $(Z_j, \tilde{Z}_j) \to (\tilde{Z}_j, Z_j)$、其余分量不变，于是
+\[
+  (W_1, \dots, W_j, \dots, W_m)
+  = (W_1, \dots, -\!W_j, \dots, W_m) \ \text{依分布相等}.
+\]
+边缘化其余坐标即得 $W_j \overset{d}{=} -W_j$。这就是 \eqref{eq:knockoff-sym}。\textit{诚实的注记}：实际统计量里其他 $W_i$ 也会因影子 $\tilde{\x}_j$ 参与拟合而轻微变化，严格论证需要「增广设计的交换不变性 + 统计量对交换的等变性」这对条件（Barber--Candès 2015 的 sign-flip property），结论不变：零假设下整组 $W$ 的符号可以任意翻转。
+
+\textbf{(b)} 阈值 $t$ 以上的\textbf{发现}是 $\{j : W_j \ge t\}$，个数 $R(t) = \#\{j : W_j \ge t\}$。其中假发现（$H_{0j}$ 为真者）的个数 $V(t)$ 不可观测，但由 (a)，每个假发现的 $W_j$ 以 $1/2$ 概率为正、$1/2$ 概率为负，且与 $|W_j|$ 独立（对称性）。于是
+\[
+  \E\big[ \#\{ j \text{ 零假设} : W_j \le -t \} \big]
+  = \E\big[ \#\{ j \text{ 零假设} : W_j \ge t \} \big]
+  = \E\, V(t),
+\]
+即左端的\textbf{可观测计数}（混入少量信号变量的负 $W$，只会使它偏大、更保守）是 $\E V(t)$ 的估计。knockoff+ 的阈值 \eqref{eq:knockoff} 要求 $\big(1 + \#\{W_j \le -t\}\big) / \#\{W_j \ge t\} \le q$：分母是 $R(t)$，分子是 $\widehat{V(t)} + 1$（$+1$ 抵消分子随机性的过离散）。于是每个候选阈值都满足 $\widehat{V(t)}/R(t) \le q$，再对随机排序取期望（Knockoff 定理的技术部分是给这个「比值估计」套上鞅论证）即得 $\mathrm{FDR} \le q$。直觉一句话：\textbf{影子变量是真变量的对称镜像，负 $W$ 的个数就是混进来的假货的倒影}。$\square$
+\end{description}
+
+\subsection{第 8 章：非线性的潜空间}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:kernel-dual}（核岭回归原始形式 $=$ 对偶形式）]
+原始（primal）形式的预测：$\hat{f}(\tilde{\bm{z}}) = \phi(\tilde{\bm{z}})^\top(\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d)^{-1}\bm{\Phi}^\top\y$。对 $(\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d)^{-1}\bm{\Phi}^\top$ 用 push-through 恒等式 \eqref{eq:push-through}（把那里的 $\X$ 换成 $\bm{\Phi}$）：
+\[
+  \hat{f}(\tilde{\bm{z}})
+  = \phi(\tilde{\bm{z}})^\top\bm{\Phi}^\top(\bm{K} + \lambda\bm{I}_n)^{-1}\y
+  = \bm{k}(\tilde{\bm{z}})^\top(\bm{K} + \lambda\bm{I}_n)^{-1}\y ,
+\]
+正是对偶（dual）形式 \eqref{eq:kernel-ridge}——两者给出\textbf{逐点完全相同}的预测函数。
+
+\textbf{秩假设。} $\lambda > 0$ 时 $\bm{\Phi}^\top\bm{\Phi} + \lambda\bm{I}_d$ 与 $\bm{K} + \lambda\bm{I}_n$ 的特征值全部 $\ge \lambda > 0$，无论 $\bm{\Phi}$ 的秩如何——这正是 ridge 正则化「顺带」完成核化的机制：它让两个空间的逆都恒存在。$\square$
+
+\item[练习 \ref{ex:kernel-interp}（高斯核的正定性与插值方程）]
+\textbf{严格正定。} 高斯核 $k(\bm{z},\bm{z}') = \exp(-\norm{\bm{z}-\bm{z}'}^2/2\sigma^2)$ 的 Fourier 变换是正函数（支撑在全频率空间，无谱空隙）。设 $\sum_i a_i k(\bm{z},\bm{z}_i) \equiv 0$：左端是 $n$ 个互不相同的 Gauss 函数的线性组合，是一个解析函数；Fourier 支撑论证（或解析函数恒等定理）迫使全部 $a_i = 0$。故 $\{k(\cdot,\bm{z}_i)\}_{i=1}^n$ 在 RKHS 中线性无关，其 Gram 矩阵 $\bm{K}$ \textbf{正定可逆}，\eqref{eq:kernel-interp} 良定义。
+
+\textbf{插值方程。} 由定义 $\bm{\alpha} = \bm{K}^{-1}\y$，故 $\bm{K}\bm{\alpha} = \y$。验证插值：在训练点 $\bm{z}_j$ 处，$\bm{k}(\bm{z}_j)$ 是 $\bm{K}$ 的第 $j$ \textit{行}，于是
+\[
+  \hat{f}(\bm{z}_j) = \bm{k}(\bm{z}_j)^\top\bm{K}^{-1}\y = (\bm{K}\bm{e}_j)^\top\bm{K}^{-1}\y = y_j .
+\]
+对应关系：这就是第 \ref{sec:gd-underdet} 章 $\X\widehat{\bbeta}' = \y$ 的核语言翻译——特征空间的插值 $\phi(\bm{z}_j)^\top\widehat{\bbeta}' = y_j$ 经内积化后变成 $\bm{K}\bm{\alpha} = \y$，「系数 $\widehat{\bbeta}'$」与「核权重 $\bm{\alpha}$」由 $\widehat{\bbeta}' = \bm{\Phi}^\top\bm{\alpha}$ 联系（representer 形式）。$\square$
+
+\item[练习 \ref{ex:ntk}（两层网络的 NTK 显式形式）]
+记 $u = \bm{\omega}^\top\bm{z} + b$，$u' = \bm{\omega}^\top\bm{z}' + b$（随机变量 $\bm{\omega}, b$ 同第 \ref{sec:ntk} 节的初始化分布）。对 \eqref{eq:two-layer} 的 $f(\bm{z}) = \frac{1}{\sqrt{D}}\sum_{j=1}^D a_j\,\sigma(\bm{\omega}_j^\top\bm{z} + b_j)$ 分别求两类参数的梯度：
+\[
+  \frac{\partial f}{\partial a_j} = \frac{1}{\sqrt{D}}\sigma(\bm{\omega}_j^\top\bm{z} + b_j),
+  \qquad
+  \nabla_{(\bm{\omega}_j, b_j)} f = \frac{a_j}{\sqrt{D}}\,\sigma'(\bm{\omega}_j^\top\bm{z} + b_j)\,(\bm{z}^\top, 1)^\top .
+\]
+参数内积（按 $1/D$ 缩放约定）拆成两层各参数贡献之和：
+\[
+  \Theta^{(D)}(\bm{z},\bm{z}')
+  = \frac{1}{D}\sum_{j=1}^D \Big[\sigma(u_j)\sigma(u_j') + a_j^2\,\sigma'(u_j)\sigma'(u_j')\,(\bm{z}^\top\bm{z}' + 1)\Big] .
+\]
+$D \to \infty$ 时初始化参数 $a_j, \bm{\omega}_j, b_j$ 独立同分布，大数定律逐点收敛到期望：
+\[
+  \Theta(\bm{z},\bm{z}') = \E\big[\sigma(u)\sigma(u')\big] + \E\big[a^2\big]\cdot\E\big[\sigma'(u)\sigma'(u')\big]\cdot(\bm{z}^\top\bm{z}' + 1).
+\]
+标准初始化 $\E[a^2] = 1$ 时即
+\[
+  \Theta(\bm{z},\bm{z}') = \underbrace{\E\big[\sigma(u)\sigma(u')\big]}_{\text{输出层贡献（= RF 核）}} + (\bm{z}^\top\bm{z}' + 1)\,\E\big[\sigma'(u)\sigma'(u')\big] .
+\]
+两点说明：若\textbf{偏置固定}不训练，则第二项退化为 $\bm{z}^\top\bm{z}'\,\E[\sigma'\sigma']$（题面所给形式即此约定）；若偏置同其他第一层参数一起训练，则内积多出 $1 \times 1$，即 $\bm{z}^\top\bm{z}' + 1$——本题取后者。
+
+\textbf{与 RF 核的比较。} RF 核 $k_{\mathrm{RF}}(\bm{z},\bm{z}') = \E[\sigma(u)\sigma(u')]$ 只含输出层贡献；NTK 额外多出导数项，且当 $\bm{z} = \bm{z}'$ 时 $\E[\sigma'(u)^2] > 0$，该项严格为正——故 $\Theta \succeq k_{\mathrm{RF}}$（作为核矩阵），严格强于 RF 核。$\square$
+
+\textbf{ReLU 的显式半空间公式。} 取 $(\bm{\omega}, b)$ 各分量独立标准正态（等价地，$(\omega_1,\dots,\omega_p,b)$ 各向同性），记 $\varphi = \arccos\!\big(\bm{z}^\top\bm{z}' / (\norm{\bm{z}}\,\norm{\bm{z}'})\big)$（ReLU 网络对常数平移不敏感，可设 $\norm{\bm{z}} = \norm{\bm{z}'} = 1$），则
+\[
+  \E\big[\relu(u)\relu(u')\big] = \frac{1}{2\pi}\big(\sin\varphi + (\pi - \varphi)\cos\varphi\big),
+\]
+\[
+  \E\big[\sigma'(u)\sigma'(u')\big] = \E\big[\ind{u > 0}\ind{u' > 0}\big] = \frac{\pi - \varphi}{2\pi}.
+\]
+后者是两个半空间的交角测度，前者是 Cho--Saul（2009）的经典半空间矩公式。代回即得 ReLU 两层网络的显式 NTK。$\square$
+\end{description}
+
+\subsection{第 9 章：结语}
+
+\begin{description}[style=nextline, itemsep=1.2ex]
+\item[练习 \ref{ex:orth-ridge}（正交设计下的最优收缩）]
+$\X^\top\X = n\bm{I}$ 时 OLS 各分量独立，$\hat\beta_j \sim \mathcal{N}(\beta_j, \sigma^2/n)$，岭解逐坐标收缩：
+\[
+  \hat\beta_j^{\mathrm{ridge}} = \frac{n}{n+\lambda}\,\hat\beta_j
+  \quad\Longrightarrow\quad
+  \MSE(\lambda) = \underbrace{\Big(\frac{\lambda}{n+\lambda}\Big)^2 \beta_j^2}_{\text{偏差}^2} + \underbrace{\frac{\sigma^2 n}{(n+\lambda)^2}}_{\text{方差}} .
+\]
+对 $\lambda$ 求导并令其为零：
+\[
+  \frac{d}{d\lambda}\,\frac{\lambda^2\beta_j^2 + \sigma^2 n}{(n+\lambda)^2} = 0
+  \;\Longleftrightarrow\;
+  \lambda\,\beta_j^2\,(n+\lambda) = \lambda^2\beta_j^2 + \sigma^2 n
+  \;\Longleftrightarrow\;
+  \boxed{\ \lambda^\star = \frac{\sigma^2}{\beta_j^2}\ } .
+\]
+（当 $\beta_j = 0$ 时偏差项恒零、方差随 $\lambda$ 递增，最优 $\lambda^\star = \infty$——把系数整个压成 $0$。故 $\lambda^\star > 0$ 当且仅当 $\beta_j \neq 0$。）
+
+\textbf{「弱信号」的精确含义。} 用噪声单位 $\sigma/\sqrt{n}$ 度量信号：$|\beta_j| \le \sigma/\sqrt{n}$（信噪比不超过 $1$）当且仅当 $\lambda^\star = \sigma^2/\beta_j^2 \ge n$，即收缩因子 $n/(n+\lambda^\star) \le \tfrac12$——\textit{弱信号的定义就是「最优收缩至少砍一半」}。
+
+\textbf{收缩的收益。} 直接代入 $\lambda^\star$：
+\[
+  \MSE(\lambda^\star) = \frac{\sigma^2\beta_j^2}{\sigma^2 + n\beta_j^2}, \qquad
+  \frac{\MSE(\lambda^\star)}{\MSE(0)} = \frac{n\beta_j^2}{\sigma^2 + n\beta_j^2} < 1 \ (\beta_j \neq 0).
+\]
+比值随 $|\beta_j| \to 0$ 趋于 $0$：信号越弱，最优收缩的收益越接近 $100\%$；$|\beta_j| \to \infty$ 时比值趋于 $1$——\textbf{强信号下最优收缩量趋于零（$\lambda^\star \to 0$），收缩自动退化为不收缩}。这就是「收缩从不伤害强信号、总帮助弱信号」在正交设计下的定量形态。$\square$
+\end{description}

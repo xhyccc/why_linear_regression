@@ -1,0 +1,104 @@
+% Chapter 5
+\section{The Gauss--Markov Theorem: Why OLS Is Best}\label{sec:gauss-markov}
+
+So far everything was deterministic: $\bhat$ minimizes squared distance, period. Now we put probability back into $\y = \X\bbeta + \bm{\varepsilon}$ and ask a statistical question: among all \emph{unbiased} estimators that are linear in $\y$, is OLS the best? The answer — yes, under surprisingly weak assumptions — is the Gauss--Markov theorem, the single most important optimality statement in all of regression. This chapter proves it.
+
+\subsection{The assumptions, and what each one buys}
+
+\begin{keybox}[The classical linear model assumptions]
+\begin{itemize}
+  \item[\textbf{(A1)}] \textbf{Linearity / correct specification}: $\E[y_i \mid \x_i] = \x_i^\top \bbeta$ for some $\bbeta$, i.e.\ $\E[\bm{\varepsilon} \mid \X] = \zero$. (Equivalently $\y = \X\bbeta + \bm{\varepsilon}$ with mean-zero errors.)
+  \item[\textbf{(A2)}] \textbf{Full column rank}: $\rank(\X) = p+1 \le n$, so $\X^\top\X$ is invertible.
+  \item[\textbf{(A3)}] \textbf{Homoscedasticity \& uncorrelatedness}: $\Var(\bm{\varepsilon} \mid \X) = \sigma^2 \bm{I}_n$ — every error has the same variance $\sigma^2$, and distinct errors are uncorrelated.
+\end{itemize}
+Note what is \emph{not} assumed: no Gaussianity, no independence (only uncorrelatedness), no identical distributions across $i$ beyond constant variance.
+\end{keybox}
+
+Assumption (A1) is the substantive one — it says the linear model is the truth, not an approximation. (A2) is needed for identifiability (Chapter~\ref{sec:ls}). (A3) is the delicate one: real errors are often heteroscedastic (a stock's daily moves have variance growing with its price level) and correlated (time series), and Chapter~\ref{sec:practice} shows what breaks when (A3) fails.
+
+\subsection{OLS is unbiased and its covariance is what it is}
+
+\begin{lemma}[Unbiasedness of OLS]\label{lem:unbiased}
+Under (A1) and (A2), $\E[\bhat \mid \X] = \bbeta$ and
+\begin{equation}\label{eq:cov}
+  \Var(\bhat \mid \X) = \sigma^2 \, (\X^\top \X)^{-1}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Substitute the model into the estimator:
+\[
+  \bhat = (\X^\top\X)^{-1}\X^\top(\X\bbeta + \bm{\varepsilon}) = \bbeta + (\X^\top\X)^{-1}\X^\top \bm{\varepsilon}.
+\]
+Taking conditional expectation and using (A1), the second term has mean zero, giving unbiasedness. For the covariance, the constant $\bbeta$ drops out and
+\[
+  \Var(\bhat \mid \X) = (\X^\top\X)^{-1}\X^\top \, \Var(\bm{\varepsilon}\mid\X) \, \X (\X^\top\X)^{-1}
+  = (\X^\top\X)^{-1}\X^\top (\sigma^2 \bm{I}) \X (\X^\top\X)^{-1} = \sigma^2 (\X^\top\X)^{-1},
+\]
+where the middle step used (A3).
+\end{proof}
+
+Equation \eqref{eq:cov} is the working horse of applied regression: standard errors of coefficients are the square roots of its diagonal (with $\sigma^2$ estimated by $\hat{\sigma}^2 = \norm{\bm{e}}^2/(n-p-1)$; that denominator, not $n$, is the unbiased choice — see Exercise~\ref{ex:sigma}).
+
+\subsection{Statement and proof of Gauss--Markov}
+
+\begin{theorem}[Gauss--Markov]\label{thm:gm}
+Under (A1)--(A3), among all estimators of $\bbeta$ that are \emph{linear functions of $\y$} and \emph{unbiased} for $\bbeta$, the OLS estimator $\bhat$ has the smallest variance in the positive-semidefinite sense: for every such competitor $\tilde{\bbeta} = \bm{A}\y$ with $\E[\tilde{\bbeta}\mid\X] = \bbeta$,
+\[
+  \Var(\tilde{\bbeta} \mid \X) - \Var(\bhat \mid \X) \;\succeq\; \zero
+  \quad (\text{positive semidefinite}),
+\]
+and in particular every diagonal element (every coefficient's variance) is at least as large as OLS's. OLS is the \textbf{Best Linear Unbiased Estimator} (BLUE).
+\end{theorem}
+
+\begin{proof}
+Let $\bm{B} := (\X^\top\X)^{-1}\X^\top$, so $\bhat = \bm{B}\y$. Any linear unbiased estimator can be written as
+\[
+  \tilde{\bbeta} = (\bm{B} + \bm{D}) \y
+\]
+for some matrix $\bm{D} \in \R^{(p+1) \times n}$. Unbiasedness for all $\bbeta$ forces
+\[
+  \E[\tilde{\bbeta}\mid\X] = (\bm{B} + \bm{D})\X\bbeta = \bbeta + \bm{D}\X\bbeta \stackrel{!}{=} \bbeta
+  \quad \text{for all } \bbeta
+  \quad\Longrightarrow\quad
+  \bm{D}\X = \zero.
+\]
+So every linear unbiased estimator differs from OLS by a matrix $\bm{D}$ annihilating the design. Its covariance:
+\[
+  \Var(\tilde{\bbeta}\mid\X) = (\bm{B}+\bm{D})(\sigma^2\bm{I})(\bm{B}+\bm{D})^\top
+  = \sigma^2 \big( \bm{B}\bm{B}^\top + \bm{B}\bm{D}^\top + \bm{D}\bm{B}^\top + \bm{D}\bm{D}^\top \big).
+\]
+Compute the cross terms. $\bm{B}\bm{D}^\top = (\X^\top\X)^{-1}\X^\top \bm{D}^\top = (\X^\top\X)^{-1}(\bm{D}\X)^\top = \zero$ by $\bm{D}\X = \zero$, and symmetrically $\bm{D}\bm{B}^\top = \zero$. Hence
+\[
+  \Var(\tilde{\bbeta}\mid\X) = \sigma^2 \bm{B}\bm{B}^\top + \sigma^2 \bm{D}\bm{D}^\top
+  = \Var(\bhat \mid \X) + \underbrace{\sigma^2 \, \bm{D}\bm{D}^\top}_{\succeq\, \zero}.
+\]
+The difference is a Gram matrix $\bm{D}\bm{D}^\top$, always positive semidefinite. Therefore $\Var(\tilde{\bbeta}\mid\X) - \Var(\bhat\mid\X) \succeq \zero$, with equality iff $\bm{D} = \zero$, i.e.\ $\tilde{\bbeta} = \bhat$ almost surely.
+\end{proof}
+
+\begin{intuition}
+The proof is four lines of linear algebra, and the content is one sentence: \emph{any deviation from OLS is, by unbiasedness, a zero-mean perturbation $\bm{D}\bm{\varepsilon}$ uncorrelated with the OLS part, and an uncorrelated perturbation can only add variance}. ``Best'' here means minimum-variance \emph{within the class of linear unbiased estimators} — both qualifiers matter, as the next two sections show.
+\end{intuition}
+
+\subsection{Why ``linear'' matters: Cram\'er--Rao and the efficiency frontier}
+
+Gauss--Markov restricts the competition to linear estimators. Can a \emph{nonlinear} unbiased estimator beat OLS? Under the additional assumption of \emph{Gaussian} errors, no: the Cram\'er--Rao lower bound says no unbiased estimator (linear or not) can have variance below $\sigma^2(\X^\top\X)^{-1}$, and OLS attains it. Under Gaussian errors OLS is the \textbf{uniformly minimum-variance unbiased estimator} (UMVUE) — the strongest possible optimality statement. Without Gaussianity, nonlinear unbiased estimators with smaller variance in some corners of parameter space do exist in principle, but none is uniformly better under (A1)--(A3) alone; OLS remains the practical optimum.
+
+\subsection{Why ``unbiased'' matters: the bias--variance trade-off}
+
+Gauss--Markov forbids bias. But unbiasedness is not the only virtue — a slightly biased estimator with dramatically smaller variance can have smaller \emph{mean squared error}:
+\[
+  \MSE(\tilde{\bbeta}) = \Var(\tilde{\bbeta}) + \bias(\tilde{\bbeta})\bias(\tilde{\bbeta})^\top.
+\]
+The Stein phenomenon (1956) made this concrete: for $p \geq 3$ Gaussian means, the MLE (the analog of OLS) is inadmissible — a deliberately biased shrinkage estimator beats it everywhere. In regression this observation becomes \textbf{ridge regression} (Chapter~\ref{sec:bias-variance}): shrink $\bhat$ toward zero, accept a little bias, buy a lot of variance reduction, and win on MSE. Gauss--Markov tells you OLS is the best \emph{unbiased} answer; the bias--variance calculus tells you when you should stop insisting on unbiasedness. Both statements are correct; the art is knowing which game you are playing — estimation of a true parameter (unbiasedness matters) versus prediction (only MSE matters).
+
+\subsection{What breaks Gauss--Markov: weighted least squares}
+
+Violate (A3) — heteroscedastic or correlated errors, $\Var(\bm{\varepsilon}\mid\X) = \bm{\Sigma} \neq \sigma^2 \bm{I}$ — and OLS stays unbiased but loses its ``B''. The new BLUE is the \textbf{generalized (weighted) least squares} estimator
+\[
+  \bhat_{\mathrm{GLS}} = (\X^\top \bm{\Sigma}^{-1} \X)^{-1} \X^\top \bm{\Sigma}^{-1} \y,
+\]
+which reweights observations so that in the transformed space errors are homoscedastic and uncorrelated. The same Gauss--Markov proof, run in the whitened coordinates $\bm{\Sigma}^{-1/2}\y = \bm{\Sigma}^{-1/2}\X\bbeta + \bm{\Sigma}^{-1/2}\bm{\varepsilon}$, gives the result (Exercise~\ref{ex:gls}). When $\bm{\Sigma}$ is unknown but structured (autocorrelation models, variance functions), feasible GLS alternates estimating $\bm{\Sigma}$ and re-fitting — another instance of the classical estimator nested inside its own modern repair.
+
+\begin{keybox}[Chapter verdict]
+Under correct specification, full rank, and homoscedastic uncorrelated errors, OLS is BLUE — provably the most efficient estimator in its class, with no distributional assumption at all. When those conditions fail, the fix is always the same idea: transform the problem until the conditions hold, then apply OLS in the new coordinates.
+\end{keybox}

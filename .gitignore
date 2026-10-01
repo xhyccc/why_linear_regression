@@ -1,0 +1,16 @@
+# LaTeX 编译中间产物
+*.aux
+*.log
+*.out
+*.toc
+*.xdv
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.bbl
+*.blg
+
+# 系统与缓存
+.DS_Store
+__pycache__/
+*.pyc

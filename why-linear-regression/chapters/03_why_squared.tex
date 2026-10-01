@@ -1,0 +1,74 @@
+% Chapter 3
+\section{Why Squared Error? Interrogating the Loss Function}\label{sec:why-squared}
+
+We minimized the sum of squared residuals because Legendre and Gauss did. But 220 years later we are allowed to ask: was that the right choice? This chapter compares the leading candidates and extracts the deep reasons squared error keeps winning.
+
+\subsection{The candidate losses}
+
+For a residual $e$, consider the penalty $\rho(e)$:
+
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Loss & $\rho(e)$ & Estimator it yields (location problem) & Behaviour \\
+\midrule
+Squared & $e^2$ & mean & smooth, strongly convex \\
+Absolute & $|e|$ & median & robust, piecewise linear \\
+$0/1$-ish & $\mathbb{1}\{|e| > \delta\}$ & mode / majority & discontinuous, combinatorial \\
+Huber & $\begin{cases} \frac{1}{2}e^2 & |e|\le\delta \\ \delta|e| - \frac{1}{2}\delta^2 & |e| > \delta\end{cases}$ & between mean and median & smooth + robust \\
+Quartic & $e^4$ & \emph{not robust at all} & over-penalizes outliers \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Minimizing $\sum_i |y_i - \theta|$ over $\theta$ yields the \emph{sample median}; minimizing $\sum_i (y_i - \theta)^2$ yields the \emph{mean}. So the choice of loss \emph{is} the choice of which notion of ``center'' the model pursues. Why prefer the mean's sensitivity over the median's robustness? Three answers.
+
+\subsection{Answer 1: differentiability and exact solvability}
+
+$e^2$ is smooth and strictly convex; $|e|$ is not differentiable at $0$ and only piecewise linear. Consequences:
+
+\begin{itemize}
+  \item With squared loss, setting the gradient to zero gives the \emph{linear} normal equations \eqref{eq:normal} — solvable in one shot, unique minimizer, no algorithmic subtleties.
+  \item With absolute loss, the optimum satisfies a \emph{set of inequalities} (a median condition) and must be found by linear programming or iteratively reweighted least squares. For a century and a half — no computers — this alone settled the argument.
+\end{itemize}
+
+Modern computation softens this argument (median regression is now routine), but it does not erase it: the entire inferential apparatus of regression (standard errors, $t$-tests, $F$-tests, confidence ellipsoids) is built on the quadratic geometry of squared loss. Change the loss and you rebuild statistics from scratch — which is a respectable thing to do, but it is a different tutorial.
+
+\subsection{Answer 2: maximum likelihood under Gaussian noise}\label{sec:why-squared-mle}
+
+Here is the probabilistic argument, due to Gauss (1809) — who inverted it, deriving the Gaussian density \emph{from} the requirement that least squares be optimal. Suppose the errors in \eqref{eq:model-matrix} are independent with $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$. Then the likelihood of observing $\y$ given $\bbeta$ is
+\[
+  L(\bbeta) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi}\sigma} \exp\!\left( -\frac{(y_i - \x_i^\top \bbeta)^2}{2\sigma^2} \right).
+\]
+The log-likelihood is
+\[
+  \ell(\bbeta) = \text{const} - \frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - \x_i^\top \bbeta)^2.
+\]
+Maximizing $\ell$ over $\bbeta$ is \emph{identical} to minimizing the sum of squared residuals. In one line:
+\[
+  \boxed{\;\text{OLS} = \text{MLE under i.i.d.\ Gaussian errors}.\;}
+\]
+The Gaussian assumption, in turn, is not arbitrary: by the central limit theorem, errors that are the sum of many small independent disturbances tend to be Gaussian; and the Gaussian is the maximum-entropy distribution with fixed variance — the ``least informative'' error model consistent with a given noise level.
+
+Note the asymmetry in what this proves: squared loss is optimal \emph{if} errors are Gaussian, and badly suboptimal if errors are heavy-tailed (Chapter~\ref{sec:practice}). The mean chases outliers; the median shrugs at them. This is the honest, complete answer to ``why squared'': it is the right loss for a specific, defensible noise model, and a fragile one outside it.
+
+\subsection{Answer 3: Gauss's counterfactual — deriving the Gaussian from least squares}
+
+Gauss asked the reverse question: \emph{what error distribution makes the sample mean (the least-squares estimate of location) equal to the maximum likelihood estimate?} The answer, up to location and scale, is the Gaussian density
+\[
+  \varphi(x) = \frac{1}{\sqrt{2\pi}\sigma} e^{-x^2 / 2\sigma^2}.
+\]
+Sketch: in the location problem $y_i = \mu + \varepsilon_i$, MLE sets $\sum_i \frac{\varphi'}{\varphi}(y_i - \mu) = 0$. For this to hold at $\mu = \bar{y}$ for \emph{every} sample, one needs $\frac{\varphi'}{\varphi}$ linear, i.e.\ $\varphi'/\varphi(x) = -x/\sigma^2$, whose solution is the Gaussian. So the Gaussian density and the squared loss are \emph{matched pairings} — each is the natural partner of the other. This mutual optimality, not coincidence, is the deepest ``why squared'' there is.
+
+\subsection{What squared error quietly assumes — and the modern repair}
+
+Squaring penalizes large errors \emph{quadratically}, so a single corrupted point with residual $10$ is penalized $100$ times as much as one with residual $1$; a residual of $100$, $10{,}000$ times. OLS is therefore \emph{non-robust}: a few gross outliers can drag the fitted line arbitrarily far. Practitioners have two honest responses:
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Diagnose}: plot residuals; if the few large ones are data errors, fix or remove them (Chapter~\ref{sec:practice}).
+  \item \textbf{Change the loss}: Huber's loss behaves like $e^2$ near zero (efficient for Gaussian-like bulk) and like $|e|$ in the tails (bounded influence of outliers). Its estimator is computed by iteratively reweighted least squares — literally running OLS over and over with weights that downweight large residuals, a beautiful case of the classical method \emph{inside} the modern repair.
+\end{enumerate}
+
+\begin{keybox}[Verdict on squared error]
+Squared error is not a law of nature; it is the optimal loss under Gaussian noise, the uniquely tractable smooth loss, and half of a matched pair with the Gaussian distribution. Use it by default, know what it costs (sensitivity to outliers), and know the repair (robust losses, diagnostics). Knowing \emph{when} your default breaks is the real lesson of this chapter.
+\end{keybox}

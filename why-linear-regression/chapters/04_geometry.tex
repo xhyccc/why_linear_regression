@@ -1,0 +1,109 @@
+% Chapter 4
+\section{The Geometry of Least Squares: Regression as Projection}\label{sec:geometry}
+
+Statistics courses present $\bhat = (\X^\top \X)^{-1} \X^\top \y$ as a formula to memorize. This chapter shows that the formula \emph{is} a picture: fitting a linear model is projecting the response vector onto the column space of the design matrix. Once you see the picture, the normal equations, $R^2$, the hat matrix, and even multicollinearity become obvious.
+
+\subsection{Column space and the projection problem}
+
+Let $\X = [\x_0, \x_1, \dots, \x_p] \in \R^{n \times (p+1)}$ with columns $\x_j \in \R^n$. The \textbf{column space} (or \emph{range})
+\[
+  \mathcal{C}(\X) = \{ \X \bbeta : \bbeta \in \R^{p+1} \} \subseteq \R^n
+\]
+is the set of all vectors the model can possibly produce — the set of all fitted-value vectors. It is a linear subspace of dimension $\rank(\X) = p+1$ (assuming full rank).
+
+Fitting the model means: \emph{find the point of $\mathcal{C}(\X)$ closest to $\y$}. The Euclidean distance from $\y$ to $\X\bbeta$ is exactly $\norm{\y - \X\bbeta}$ — the square root of our loss \eqref{eq:rss}. So:
+
+\begin{keybox}[The geometric statement of least squares]
+\[
+  \bhat = \arg\min_{\bbeta} \norm{\y - \X \bbeta}
+  \quad\Longleftrightarrow\quad
+  \X \bhat \text{ is the orthogonal projection of } \y \text{ onto } \mathcal{C}(\X).
+\]
+OLS is the closest the model's subspace can come to the data. Nothing more, nothing less.
+\end{keybox}
+
+\subsection{Why the normal equations are the Pythagorean theorem}
+
+Take any candidate $\X \bbeta \in \mathcal{C}(\X)$. Decompose $\y = \X\bhat + \bm{e}$. The normal equations say $\X^\top \bm{e} = 0$, i.e.\ $\bm{e} \perp \mathcal{C}(\X)$. For any other point $\X \bbeta$ in the subspace, the vector $\X(\bbeta - \bhat)$ lies in $\mathcal{C}(\X)$, hence is orthogonal to $\bm{e}$. By Pythagoras:
+\[
+  \norm{\y - \X \bbeta}^2
+  = \norm{\X(\bhat - \bbeta) + \bm{e}}^2
+  = \norm{\X(\bhat - \bbeta)}^2 + \norm{\bm{e}}^2
+  \;\geq\; \norm{\bm{e}}^2 = \norm{\y - \X \bhat}^2,
+\]
+with equality iff $\bbeta = \bhat$. This is a \emph{proof without calculus}: orthogonality implies optimality, and conversely, any optimal point must have residual orthogonal to the subspace (otherwise you could slide along the subspace to get closer). The normal equations are not an algebraic accident — they are the statement that the residual is perpendicular to the model's world.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.88\linewidth}{!}{%
+\begin{tikzpicture}[scale=1.15, >=Stealth]
+  % column space plane
+  \coordinate (O) at (0,0);
+  \coordinate (u) at (4.6,1.5);
+  \coordinate (v) at (1.4,2.6);
+  \fill[lightband] (O) -- (u) -- ($(u)+(v)$) -- (v) -- cycle;
+  \node[color=accent] at (3.1,2.9) {$\mathcal{C}(\X)$};
+  % vectors
+  \coordinate (yhat) at (2.7,1.0);
+  \coordinate (y) at (2.7,3.3);
+  \draw[->, very thick, color=accent] (O) -- (yhat) node[midway, below right=-1pt] {$\hat{\y} = \X \bhat$};
+  \draw[->, very thick] (O) -- (y) node[above] {$\y$};
+  \draw[->, thick, color=red!70!black] (yhat) -- (y) node[midway, right] {$\bm{e} = \y - \hat{\y}$};
+  \draw[->, dashed] (O) -- (4.1,1.55) node[below right=-2pt] {$\X\bbeta$};
+  \draw[->, dashed, color=red!70!black] (4.1,1.55) -- (y);
+  % right angle marker
+  \draw ($(yhat)+(-0.16,0.12)$) -- ++(0.12,0.16) -- ++(0.16,-0.12);
+\end{tikzpicture}}%
+\caption{Least squares as orthogonal projection. $\hat{\y}$ is the foot of the perpendicular from $\y$ to the subspace $\mathcal{C}(\X)$; any other point $\X\bbeta$ in the subspace gives a longer residual vector (dashed), by the Pythagorean theorem.}
+\label{fig:projection}
+\end{figure}
+
+\subsection{The hat matrix}
+
+The map $\y \mapsto \hat{\y}$ is linear: with $\X$ full column rank,
+\begin{equation}\label{eq:hat}
+  \hat{\y} = \X \bhat = \X (\X^\top \X)^{-1} \X^\top \y =: \bm{H} \y,
+  \qquad
+  \bm{H} := \X (\X^\top \X)^{-1} \X^\top.
+\end{equation}
+$\bm{H}$ is called the \textbf{hat matrix} — it puts the hat on $\y$. Its defining properties deserve a pause:
+
+\begin{lemma}[Properties of the hat matrix]\label{lem:hat}
+$\bm{H}$ is symmetric ($\bm{H}^\top = \bm{H}$) and idempotent ($\bm{H}^2 = \bm{H}$) — i.e., $\bm{H}$ is an \emph{orthogonal projection matrix}. It projects onto $\mathcal{C}(\X)$ along its orthogonal complement; $\bm{I} - \bm{H}$ projects onto $\mathcal{C}(\X)^\perp$ (it is also symmetric and idempotent, and $\bm{H}(\bm{I}-\bm{H}) = \zero$).
+\end{lemma}
+
+\begin{proof}
+Symmetry: $\bm{H}^\top = \X (\X^\top\X)^{-1} \X^\top = \bm{H}$ since $(\X^\top\X)^{-1}$ is symmetric. Idempotence: $\bm{H}^2 = \X(\X^\top\X)^{-1}\X^\top\X(\X^\top\X)^{-1}\X^\top = \X(\X^\top\X)^{-1}\X^\top = \bm{H}$. Since $\bm{H}$ is the matrix of an orthogonal projection (Theorem: a matrix is an orthogonal projection onto a subspace iff it is symmetric and idempotent), its range is the subspace it projects onto — visibly $\mathcal{C}(\X)$.
+\end{proof}
+
+Consequences, all geometric:
+\begin{itemize}
+  \item \textbf{Residual maker}: $\bm{e} = (\bm{I} - \bm{H})\y$, so residuals are the orthogonal complement of the projection.
+  \item \textbf{Fitted values are a smoothing}: each $\hat{y}_i = \sum_j H_{ij} y_j$ is a weighted average of \emph{all} observations; $H_{ii} \in [0,1]$ measures how much of $y_i$ is ``self-explained'' (its \emph{leverage}, central to outlier detection, Chapter~\ref{sec:practice}).
+  \item \textbf{Degrees of freedom}: $\trace(\bm{H}) = p+1$ and $\trace(\bm{I}-\bm{H}) = n - p - 1$ (proved in Lemma~\ref{lem:trace}), matching the familiar ``$n$ minus number of parameters'' in the residual variance estimate $\hat{\sigma}^2 = \norm{\bm{e}}^2 / (n-p-1)$.
+  \item \textbf{Algebraic view of $(\X^\top\X)^{-1}\X^\top$}: the matrix $\X^+ := (\X^\top\X)^{-1}\X^\top$ is the pseudoinverse of $\X$; \eqref{eq:hat} says projection = design matrix $\times$ pseudoinverse.
+\end{itemize}
+
+\begin{lemma}[Trace of a projection]\label{lem:trace}
+If $\bm{P}$ is symmetric and idempotent ($\bm{P}^2 = \bm{P}$), then $\trace(\bm{P}) = \rank(\bm{P})$.
+\end{lemma}
+\begin{proof}
+Over the reals, symmetric matrices are orthogonally diagonalizable: $\bm{P} = \bm{Q} \bm{\Lambda} \bm{Q}^\top$ with $\bm{Q}^\top \bm{Q} = \bm{I}$. Idempotence gives $\bm{\Lambda}^2 = \bm{\Lambda}$, so eigenvalues are $0$ or $1$, and $\rank(\bm{P})$ = number of eigenvalues equal to 1 = $\sum \lambda_i = \trace(\bm{Q}\bm{\Lambda}\bm{Q}^\top) = \trace(\bm{\Lambda}\bm{Q}^\top\bm{Q}) = \trace(\bm{\Lambda}) = \trace(\bm{P})$.
+\end{proof}
+
+\subsection{QR decomposition: how computers actually solve least squares}
+
+Forming $\X^\top \X$ squares the \emph{condition number} (sensitivity to numerical error) of $\X$ — a bad idea. The numerically sound route: factor $\X = \bm{Q}\bm{R}$ with $\bm{Q} \in \R^{n \times (p+1)}$ having orthonormal columns ($\bm{Q}^\top \bm{Q} = \bm{I}$) and $\bm{R}$ upper triangular. Then
+\[
+  \bm{H} = \bm{Q}\bm{Q}^\top, \qquad
+  \bhat = \bm{R}^{-1} \bm{Q}^\top \y,
+\]
+and the latter is computed by \emph{back-substitution}, never by inversion. Note the geometry: $\bm{Q}$ is an orthonormal basis of $\mathcal{C}(\X)$, and $\bm{Q}^\top \y$ computes the coordinates of the projection in that basis — the formula $\bhat = (\X^\top\X)^{-1}\X^\top\y$ is what you \emph{prove with}; $\bm{R}^{-1}\bm{Q}^\top\y$ is what you \emph{compute with}. This distinction — proof versus computation — recurs in Chapter~\ref{sec:beyond} (normal equations vs.\ gradient descent).
+
+\subsection{What the picture says about multicollinearity}
+
+The projection picture explains instantly why correlated features hurt. If two columns of $\X$ are nearly parallel, the subspace $\mathcal{C}(\X)$ contains directions in which fitted values are nearly unchanged while $\bbeta$ moves a lot: the map $\bbeta \mapsto \X\bbeta$ becomes ill-conditioned near the ridge $\{\bbeta : \X\bbeta = \text{const}\}$, so $(\X^\top\X)^{-1}$ blows up, and coefficient estimates become large, unstable, and individually meaningless even though \emph{predictions} are fine. The pathology lives in parameter space, not prediction space — a distinction the geometry makes unavoidable, and the ridge penalty of Chapter~\ref{sec:bias-variance} is designed to cure.
+
+\begin{keybox}[Geometric summary]
+Least squares = closest point in a linear subspace = orthogonal projection. The normal equations say the residual is perpendicular to the model; the hat matrix is the projector; $R^2$ is the cosine of an angle; multicollinearity is near-degeneracy of the subspace's parameterization. One picture, four theorems.
+\end{keybox}

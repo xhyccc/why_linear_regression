@@ -1,0 +1,188 @@
+% 第 3 章
+\section{高维线性回归：当 $n \gg d$ 时的闭式世界}\label{sec:highdim}
+
+一维是直觉，高维是工作。本章设样本量为 $n$、特征维度为 $d$，模型
+\begin{equation}\label{eq:hd-model}
+  y_i = \x_i^\top \bbeta + \varepsilon_i,
+  \qquad \text{即} \qquad
+  \y = \X \bbeta + \bm{\varepsilon},
+\end{equation}
+其中 $\X = [\x_1^\top; \dots; \x_n^\top] \in \R^{n \times d}$ 为设计矩阵，$\y \in \R^n$，$\bbeta \in \R^d$ 未知。我们先在最经典的\textbf{过定}（overdetermined）情形 $n \gg d$ 下推导闭式解，再看这个闭式解的几何与统计含义，最后看 $n$ 靠近 $d$ 时什么先坏掉、修复又是什么。
+
+\subsection{最小二乘与正规方程}\label{sec:hd-ls}
+
+总残差平方和
+\begin{equation}\label{eq:hd-rss}
+  S(\bbeta) = \sum_{i=1}^n \big( y_i - \x_i^\top \bbeta \big)^2 = \norm{\y - \X \bbeta}^2
+  = \y^\top \y - 2 \bbeta^\top \X^\top \y + \bbeta^\top \X^\top \X \bbeta .
+\end{equation}
+利用向量求导公式 $\nabla_{\bbeta}(\bm{c}^\top \bbeta) = \bm{c}$ 与 $\nabla_{\bbeta}(\bbeta^\top \bm{A} \bbeta) = 2\bm{A}\bbeta$（$\bm{A}$ 对称），梯度为
+\begin{equation}\label{eq:hd-grad}
+  \nabla_{\bbeta} S = -2 \X^\top \y + 2 \X^\top \X \bbeta .
+\end{equation}
+令其为零得\textbf{正规方程}：
+\begin{equation}\label{eq:normal-eq}
+  \boxed{\;\X^\top \X \, \bhat = \X^\top \y\;}
+\end{equation}
+
+\subsection{$n \gg d$ 的闭式解：存在、唯一、可算}\label{sec:hd-closed}
+
+\begin{theorem}[闭式解及其唯一性]\label{thm:closed-form}
+若 $\X$ 列满秩，即 $\rank(\X) = d$（等价地，$d$ 列线性无关，要求 $n \ge d$），则 Gram 矩阵 $\X^\top\X \in \R^{d \times d}$ 对称正定、可逆，正规方程有唯一解
+\begin{equation}\label{eq:ols-closed}
+  \boxed{\;\bhat = (\X^\top \X)^{-1} \X^\top \y\;}
+\end{equation}
+且因 Hessian $\nabla^2 S = 2 \X^\top \X \succ \zero$，$S$ 严格凸，\eqref{eq:ols-closed} 是 $S$ 的\textit{唯一全局最小点}。
+\end{theorem}
+\begin{proof}
+对任意 $\bm{v} \neq \zero$，$\bm{v}^\top \X^\top \X \bm{v} = \norm{\X \bm{v}}^2 > 0$：若它为 $0$ 则 $\X\bm{v} = \zero$，与列无关矛盾。故 $\X^\top\X \succ \zero$，正定矩阵可逆（其特征值全正），代入即得 \eqref{eq:ols-closed}。严格凸函数的驻点即唯一全局极小。
+\end{proof}
+
+注意条件的真实含义。$n \gg d$ 只是「采样充足」的通俗说法；定理真正要求的只有\textbf{列满秩}——它保证从 $\bbeta$ 到拟合值 $\X\bbeta$ 的映射没有冗余方向，参数可被数据唯一确定。现实中 $n \gg d$ 使列满秩\textit{大概率}成立（连续分布的随机设计几乎必然满秩），这正是经典统计学的默认工作区间。
+
+顺带一提秩亏的情形：若某列是其他列的线性组合（完全共线），$\X^\top\X$ 奇异，$\bhat$ 不唯一——但拟合值 $\X\bhat$ 仍然唯一。所有最小范数解由 \textbf{Moore--Penrose 伪逆} $\X^+$ 统一给出\cite{penrose1955}：
+\begin{equation}\label{eq:pseudo}
+  \bhat = \X^+ \y,
+\end{equation}
+R 的 \texttt{lm}、NumPy 的 \texttt{lstsq}、scikit-learn 的 \texttt{LinearRegression} 算的都是它（经 QR/SVD 分解，而非显式求逆，见 \ref{sec:hd-compute} 节）。
+
+\subsection{几何：投影，又一次}\label{sec:hd-geometry}
+
+把 $\X$ 的列看作 $\R^n$ 中的 $d$ 个向量，其列空间
+\[
+  \mathcal{C}(\X) = \{\X \bbeta : \bbeta \in \R^d\} \subseteq \R^n
+\]
+是模型\textbf{能产生的全部拟合值向量}。拟合模型 = 在 $\mathcal{C}(\X)$ 中找离 $\y$ 最近的点，而欧氏距离正是 $\norm{\y - \X\bbeta}$——即损失 \eqref{eq:hd-rss} 的平方根。于是：
+
+\begin{keybox}[最小二乘的几何陈述]
+\[
+  \bhat = \arg\min_{\bbeta} \norm{\y - \X \bbeta}
+  \quad\Longleftrightarrow\quad
+  \X \bhat \text{ 是 } \y \text{ 到列空间 } \mathcal{C}(\X) \text{ 的正交投影。}
+\]
+\end{keybox}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=1.5, >=Stealth, font=\small]
+    % 列空间平面 C(X)
+    \draw[fill=blue!6, opacity=0.9] (-3.0,-1.3) -- (3.2,-0.6) -- (2.6,1.9) -- (-3.6,1.2) -- cycle;
+    \node[blue!55!black, font=\small] at (0.2,-1.62) {$\mathcal{C}(\X)$（$\X$ 的列空间，$d$ 维平面）};
+    % y 向量与投影
+    \coordinate (O) at (-1.3,-0.25);
+    \coordinate (Y) at (1.35,3.4);
+    \coordinate (P) at (0.5,1.05);
+    \draw[->, very thick, gray!45!black] (O) -- (Y) node[above=2pt] {$\y$};
+    \draw[->, very thick, red!60!black] (O) -- (P)
+        node[pos=0.75, below left=1pt] {$\X\widehat{\bbeta}$（垂足）};
+    \draw[->, very thick, green!45!black] (P) -- (Y)
+        node[midway, right=2pt, align=left] {$\bm{e}=\y-\X\widehat{\bbeta}$\\（残差 $\perp$ 列空间）};
+    % 直角标记
+    \draw[green!45!black] ($(P)+(-0.17,-0.12)$) -- ++(-0.065,0.15) -- ++(0.18,0.075);
+    % 其他 beta 的拟合值
+    \coordinate (Q) at (2.2,0.5);
+    \draw[->, thick, gray!70] (O) -- (Q)
+        node[below right=-1pt] {$\X\bbeta$（任一其他拟合）};
+    \draw[dashed, gray!70] (Y) -- (Q);
+    \node[gray!70, rotate=-24, font=\small] at (2.45,2.15) {$\norm{\y-\X\bbeta}\ge\norm{\bm{e}}$};
+  \end{tikzpicture}
+  \caption{最小二乘的几何：$\y$ 到列空间 $\mathcal{C}(\X)$ 的垂足是 $\X\widehat{\bbeta}$。垂线段 $\bm{e}$ 是最短残差（绿）；任何其他拟合值 $\X\bbeta$（灰）到 $\y$ 的斜线都更长——垂直即最优。}
+  \label{fig:ch3-projection}
+\end{figure}
+
+正规方程 $\X^\top(\y - \X\bhat) = \zero$ 说的是：\textbf{残差向量与 $\X$ 的每一列正交}（normal 在几何里就是「法向/垂直」）。由勾股定理，对任意其他 $\X\bbeta \in \mathcal{C}(\X)$，
+\[
+  \norm{\y - \X\bbeta}^2 = \norm{\X(\bhat - \bbeta)}^2 + \norm{\bm{e}}^2 \ge \norm{\bm{e}}^2,
+\]
+等号当且仅当 $\bbeta = \bhat$——没有微积分的证明：垂直推出最优。
+
+由此得到一个贯穿所有回归计算的矩阵。\textbf{hat matrix}
+\begin{equation}\label{eq:hat}
+  \bm{H} = \X (\X^\top \X)^{-1} \X^\top,
+  \qquad
+  \hat{\y} = \bm{H} \y, \quad \bm{e} = (\bm{I} - \bm{H})\y .
+\end{equation}
+直接验证：$\bm{H}^\top = \bm{H}$ 且 $\bm{H}^2 = \bm{H}$——\textbf{对称 + 幂等 = 正交投影矩阵}。两个即刻可用的推论：$\trace(\bm{H}) = \trace((\X^\top\X)^{-1}\X^\top\X) = d$（自由度 $d$ 的来历，残差占用 $n - d$）；对角元 $H_{ii} \in [0,1]$ 度量第 $i$ 个样本的「杠杆」（离群 $x$ 会顶起 $H_{ii}$，是诊断的起点）。一维的结论全部推广：拟合值与残差正交，$R^2$ 仍是「被解释方差占比」。
+
+\subsection{统计：何时这个闭式解是「最优」的}\label{sec:hd-gm}
+
+闭式解只承诺「离数据最近」。统计学要问：作为未知真值 $\bbeta$ 的\textit{估计}，它好到什么程度？Gauss（1823）证明、后由 Markov（1912）形式化的 \textbf{Gauss--Markov 定理}给出答案\cite{gauss1823}：
+
+\begin{keybox}[Gauss--Markov，非正式陈述]
+在模型 \eqref{eq:hd-model} 下，若误差满足：零均值（$\E[\bm{\varepsilon}] = \zero$，模型设定正确）、同方差且不相关（$\Var(\bm{\varepsilon}) = \sigma^2 \bm{I}$），$\X$ 列满秩——\textbf{不假设任何误差分布}——则最小二乘估计 $\bhat$ 是一切「$\y$ 的线性、无偏」估计中方差最小的，即 \emph{最优线性无偏估计}（BLUE）。
+\end{keybox}
+
+证明骨架（完整版见练习 \ref{ex:gm}）：把任意线性无偏竞争者写成 $\tilde{\bbeta} = (\bm{B} + \bm{D})\y$，其中 $\bm{B} = (\X^\top\X)^{-1}\X^\top$；无偏性迫使 $\bm{D}\X = \zero$。于是
+\[
+  \Var(\tilde{\bbeta}) = \sigma^2(\bm{B} + \bm{D})(\bm{B} + \bm{D})^\top
+  = \underbrace{\sigma^2 \bm{B}\bm{B}^\top}_{\Var(\bhat)} + \underbrace{\sigma^2 \bm{D}\bm{D}^\top}_{\succeq\, \zero},
+\]
+交叉项因 $\bm{D}\X = \zero$ 消失。一句话：\textit{任何偏离 OLS 的无偏改动，都是一个与 OLS 不相关、均值为零的扰动，而无关联的扰动只会增加方差。}
+
+两个「限定词」决定定理的边界：
+\begin{itemize}
+  \item \textbf{「线性」}：若再假设误差高斯，Cram\'er--Rao 下界表明没有\textit{任何}（无论线性与否）无偏估计能胜过 $\bhat$；
+  \item \textbf{「无偏」}：一旦允许有偏（ridge、lasso），可以换到更小的均方误差——见 \ref{sec:hd-break} 节。
+\end{itemize}
+
+\subsection{为什么偏偏是平方误差？}\label{sec:why-square}
+
+引言里的问题 (3) 现在可以正面回答了。换别的损失会丢掉什么？三个层层递进的回答。
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{几何与优化的回答}：平方使损失是二次的——可微、严格凸、驻点即全局最优，正规方程是\textit{线性}方程组；第 \ref{sec:gd} 章还会看到，它让梯度下降的每一步都有关于 $t$ 的精确解。换绝对值损失，损失仍凸，但零点不可微、最优解是中位数而非均值、正规方程变成一组分段线性条件——同一扇门，通往的是一个复杂得多的房间。
+  \item \textbf{概率论的回答}（Gauss, 1809）：若 $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$ i.i.d.，则数据的似然正比于
+  \[
+    \exp\Big( -\tfrac{1}{2\sigma^2} \norm{\y - \X\bbeta}^2 \Big),
+  \]
+  最大化似然 $\Longleftrightarrow$ 最小化平方残差和——\textbf{平方误差恰是高斯噪声下的极大似然}\cite{gauss1809}。Gauss 正是沿这条路为最小二乘补上概率论地基，并主张「大自然以钟形曲线度量误差」。这个回答给损失赋予了一种\textbf{假设身份}：平方损失宣称的是「大误差以指数平方速率变得极不可能」，比中位数回归背后的 Laplace 假设（指数线性速率）激进得多——离群点会把平方解拉得更狠。
+  \item \textbf{统计学的回答}：就是 Gauss--Markov——在零均值、同方差、不相关的\textit{弱}条件下，平方损失（等价地：最小方差）意义下 $\bhat$ 已是全部线性无偏估计的最优；误差一旦高斯，再借助 Cram\'er--Rao 升级为\textit{一切}无偏估计的最优。
+\end{enumerate}
+
+一句话总结：\textit{平方误差是「误差近似高斯 + 估计量要求线性无偏」这一对假设的影子}。换损失（绝对值、Huber、分位数）从来不是「换个度量」那么简单，而是换一套关于误差世界的假设——先审计假设，再谈换损失；这正是稳健回归与广义线性模型的入口。
+
+\begin{exercise}\label{ex:gm}
+补全 Gauss--Markov 定理的证明：验证任意线性无偏估计 $\tilde{\bbeta} = \bm{A}\y$ 必可写成 $(\bm{B} + \bm{D})\y$（$\bm{B} = (\X^\top\X)^{-1}\X^\top$）且 $\bm{D}\X = \zero$，并推导 $\Var(\tilde{\bbeta}) - \Var(\bhat) = \sigma^2 \bm{D}\bm{D}^\top \succeq \zero$。
+\end{exercise}
+
+\subsection{当 $n$ 不再远大于 $d$：什么先坏，如何修}\label{sec:hd-break}
+
+Gauss--Markov 的世界里一切都是 $n \gg d$ 的世界。现在把 $n$ 推向 $d$，按坏掉的顺序：
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{$d \to n$：$\X^\top\X$ 病态。}某些特征方向几乎不被数据支撑（小特征值），$(\X^\top\X)^{-1}$ 在这些方向上放大噪声——$\bhat$ 的方差爆炸（协方差 $\sigma^2(\X^\top\X)^{-1}$ 的对角元飙升），系数\textit{符号}都可能不稳定，而预测在观测点仍然不差。病灶在参数空间，不在预测空间。
+  \item \textbf{$d = n$：$\X$ 方阵可逆，残差为零。}拟合变成插值：训练误差 $0$，泛化 error 起飞——过拟合的代数面目。
+  \item \textbf{$d > n$：$\X^\top\X$ 必奇异。}解有无穷多个，OLS \textit{未被定义}，必须借外力选定一个。
+\end{enumerate}
+
+修复思想一脉相承：给参数加一个「规模预算」。\textbf{岭回归}（Hoerl \& Kennard, 1970）\cite{hoerl1970}：
+\begin{equation}\label{eq:ridge}
+  \bhat^{\mathrm{ridge}} = \arg\min_{\bbeta} \; \norm{\y - \X \bbeta}^2 + \lambda \norm{\bbeta}^2
+  \quad\Longrightarrow\quad
+  \bhat^{\mathrm{ridge}} = (\X^\top \X + \lambda \bm{I})^{-1} \X^\top \y .
+\end{equation}
+三重视角：\textbf{数值}上，$\X^\top\X + \lambda\bm{I} \succ \zero$ 恒成立——任何 $\lambda > 0$ 都恢复唯一解；\textbf{几何}上，它是约束问题 $\min \norm{\y - \X\bbeta}^2$ s.t.\ $\norm{\bbeta}^2 \le c$ 的 Lagrange 形式，病态方向上系数被强制压缩；\textbf{统计}上，用 SVD $\X = \bm{U}\bm{D}\bm{V}^\top$ 可见岭把 OLS 的每个 $1/d_j$ 换成 $d_j/(d_j^2 + \lambda) < 1/d_j$——\textit{恰好驯服 OLS 放大的那些小奇异值方向}。代价是引入偏差（练习 \ref{ex:ridge-bias}），收益是方差大降，总均方误差在弱信号区间反而更小。\textbf{lasso}（Tibshirani, 1996）换用 $\ell_1$ 惩罚 $\lambda\norm{\bbeta}_1$，把部分系数精确压成 $0$，附带变量选择\cite{tibshirani1996}。惩罚参数 $\lambda$ 由交叉验证估计预测误差选取——闭环就此完成：\textit{正则化不是 OLS 的反对面，而是 OLS 在 $d \approx n$ 时的续命方案}。
+
+\begin{exercise}\label{ex:ridge-bias}
+由 \eqref{eq:ridge} 推导 $\bhat^{\mathrm{ridge}}$ 的表达式，并证明其偏差为 $-\lambda(\X^\top\X + \lambda\bm{I})^{-1}\bbeta$。
+\end{exercise}
+
+\subsection{计算注记：证明用的与工程用的}\label{sec:hd-compute}
+
+\textit{证明}时我们写 $(\X^\top\X)^{-1}\X^\top\y$；\textit{计算}时没人真的求逆——形成 $\X^\top\X$ 会把 $\X$ 的条件数平方，数值上自毁。工程做法是 QR 分解 $\X = \bm{Q}\bm{R}$（$\bm{Q}$ 列正交归一，$\bm{R}$ 上三角），则
+\[
+  \bm{H} = \bm{Q}\bm{Q}^\top,
+  \qquad
+  \bhat = \bm{R}^{-1}\bm{Q}^\top \y \;\;(\text{回代求解，永不显式求逆。})
+\]
+$\bm{Q}^\top\y$ 正是 $\y$ 在正交基下的投影坐标——第 \ref{sec:hd-geometry} 节的几何，就是计算机里跑的东西。\textbf{证明的公式与计算的算法，是同一个对象的两张脸}：这也是「为什么学线性回归」的标准答案之一——它是唯一一个这两张脸能同时看清的模型。
+
+\begin{keybox}[本章要点]
+\begin{itemize}
+  \item 高维最小二乘在 $\X$ 列满秩（$n \gg d$ 时几乎必然）时有唯一闭式解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$，严格凸保证它是全局最优；
+  \item 几何上它是 $\y$ 到列空间的正交投影；hat matrix $\bm{H} = \X(\X^\top\X)^{-1}\X^\top$ 对称幂等，自由度 $\trace(\bm{H}) = d$；
+  \item Gauss--Markov：在零均值、同方差不相关误差下，OLS 是 BLUE——零分布假设的最优性；高斯误差下升级为一切无偏估计中的最优；
+  \item $d \to n$ 时方差先爆（病态），$d \ge n$ 时解不唯一（奇异）；岭回归 $(\X^\top\X + \lambda\bm{I})^{-1}\X^\top\y$ 与 lasso 是同一思想的正则化修复，交叉验证选 $\lambda$；
+  \item 工程上 QR/SVD 代替显式求逆；证明与计算是同一几何的两张脸。
+\end{itemize}
+\end{keybox}

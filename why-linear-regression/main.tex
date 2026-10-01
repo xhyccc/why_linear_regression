@@ -1,0 +1,108 @@
+% !TEX program = xelatex
+% Why Linear Regression — a tutorial
+% Author: 熊昊一 (Haoyi Xiong)
+\documentclass[11pt, a4paper]{ctexart}
+
+% ---------- Encoding & fonts ----------
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang SC}  % macOS built-in; fallback: STSong / Source Han Serif
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+% ---------- Typography ----------
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\definecolor{accent}{RGB}{0, 90, 160}
+\definecolor{lightband}{RGB}{240, 244, 248}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, calc, positioning, decorations.pathreplacing}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  citecolor=accent,
+  urlcolor=accent,
+  pdftitle={Why Linear Regression},
+  pdfauthor={Haoyi Xiong},
+}
+
+% ---------- Theorem-like environments ----------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}{Exercise}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{intuition}{Intuition}
+
+% ---------- Boxes ----------
+\newtcolorbox{keybox}[1][]{
+  colback=lightband, colframe=accent, fonttitle=\bfseries,
+  title={#1}, breakable, sharp corners, boxrule=0.6pt, left=2mm, right=2mm, top=1.5mm, bottom=1.5mm
+}
+
+% ---------- Macros ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\bias}{\mathrm{bias}}
+\newcommand{\MSE}{\mathrm{MSE}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\trace}{\mathrm{tr}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\bhat}{\hat{\bm{\beta}}}
+\newcommand{\bbeta}{\bm{\beta}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\zero}{\mathbf{0}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{\Huge \textbf{Why Linear Regression}\\[4pt]
+\Large A First Principles Tutorial}
+\author{熊昊一 (Haoyi Xiong)}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+Linear regression is the first model almost everyone learns and the model almost everyone underestimates.
+This tutorial is not about \emph{how} to run \texttt{lm()} in R or \texttt{LinearRegression()} in scikit-learn — it is about \emph{why} the method works, why squared error, why the normal equations, and why, after two centuries, a straight line is still where honest data analysis begins.
+We derive everything from first principles: the calculus of least squares, the geometry of projections, the Gauss--Markov theorem, the probabilistic view through maximum likelihood, and the modern view through bias--variance trade-off and regularization.
+Only high-school calculus and basic linear algebra are assumed.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\input{chapters/01_intro}
+\input{chapters/02_least_squares}
+\input{chapters/03_why_squared}
+\input{chapters/04_geometry}
+\input{chapters/05_gauss_markov}
+\input{chapters/06_probability}
+\input{chapters/07_bias_variance}
+\input{chapters/08_beyond}
+\input{chapters/09_practice}
+\input{chapters/10_epilogue}
+
+\appendix
+\input{chapters/a1_linear_algebra}
+\input{chapters/a2_exercises}
+
+\end{document}

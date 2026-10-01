@@ -1,0 +1,51 @@
+% Chapter 9
+\section{When the Assumptions Break: A Field Guide to Failure}\label{sec:practice}
+
+Every theorem in this tutorial has hypotheses. Mature use of linear regression means knowing which hypothesis fails, what symptom it produces, and what the repair costs. This chapter is the diagnostic manual, organized by assumption.
+
+\subsection{Linearity (A1): the model is wrong}
+
+\textbf{Symptoms.} Residuals show structure: curvature in residual-vs-fitted plots, systematic patterns against individual predictors.
+
+\textbf{Consequences.} Bias in everything — coefficients estimate a misspecified average effect; predictions are systematically wrong where curvature lives.
+
+\textbf{Repairs.} Feature engineering (Chapter~\ref{sec:beyond}): polynomial or spline terms, log transforms, interactions. The RESET test and added-variable plots help locate the misspecification. Note the epistemological point: OLS under misspecification still converges to the \emph{best linear predictor} — the linear projection of the truth — which is sometimes all an applied question needs, and honest reporting says so.
+
+\subsection{Full rank (A2): multicollinearity}
+
+\textbf{Symptoms.} Huge standard errors, unstable coefficient signs across resamples, individual $t$-tests insignificant while the overall $F$ is overwhelming, variance inflation factors $\mathrm{VIF}_j = 1/(1 - R_j^2)$ large (say $> 10$).
+
+\textbf{Consequences.} $\mathcal{C}(\X)$ is nearly degenerate (Chapter~\ref{sec:geometry}): predictions at observed $\x$ are fine, but coefficient interpretations and extrapolation collapse. The information to separate correlated predictors is simply absent from the data.
+
+\textbf{Repairs.} Drop or combine redundant features, center and orthogonalize, or — most honestly — switch to ridge regression and interpret the shrunken coefficients as effects ``adjusted for the correlation structure,'' not as isolated causal effects.
+
+\subsection{Homoscedasticity and uncorrelatedness (A3): the variance structure}
+
+\textbf{Heteroscedasticity.} Symptoms: fan-shaped residual plots. Consequences: OLS stays unbiased and consistent, but it is no longer efficient (GLS beats it — Chapter~\ref{sec:gauss-markov}); the immediate practical damage is wrong standard errors, i.e.\ wrong tests and intervals, even though $\bhat$ itself is consistent. Two repairs: (i) \emph{heteroscedasticity-consistent} (Huber--White, ``sandwich'') standard errors, which correct inference without touching the estimator; (ii) GLS with a variance model $\sigma_i^2 = h(\x_i)$.
+
+\textbf{Correlated errors.} In time series and grouped data, $\Cov(\varepsilon_i, \varepsilon_j) \neq 0$ — e.g.\ autocorrelation or cluster dependence. Symptoms: residuals autocorrelated (Durbin--Watson statistic far from 2); consequences: $\hat\sigma^2$ too small, standard errors too small, $t$-statistics far too optimistic, nonsense ``significance.'' Repairs: cluster-robust or Newey--West standard errors; GLS with an autocorrelation model; or mixed models that model the correlation explicitly.
+
+\subsection{Normality (A4): tails and outliers}
+
+\textbf{Symptoms.} Heavy-tailed residuals, a few points with enormous residuals or leverage ($H_{ii}$ near 1), influence statistics (Cook's distance) flagging observations that move coefficients more than the rest of the data combined.
+
+\textbf{Consequences.} With large $n$, CLT (Chapter~\ref{sec:probability}) protects the tests; with small $n$ or severe contamination, inference can be badly wrong, and \emph{estimates} can be dragged off by outliers regardless of $n$.
+
+\textbf{Repairs.} Diagnose with leverage/residual/influence plots (the three measure distinct pathologies: unusual $\x$, large $e$, and large effect on $\bhat$, respectively); use robust losses (Chapter~\ref{sec:why-squared}); use quantile regression if the question concerns medians; never delete ``ugly'' points silently — report sensitivity with and without them (the user's own taste: surface weaknesses honestly, disclose rather than hide).
+
+\subsection{$n$ versus $p$: the modern regime}
+
+Classical theory assumed $n \gg p$; modern data often has $p \geq n$ or $p \gg n$. Then:
+\begin{itemize}
+  \item $\X^\top\X$ is singular — OLS is not even defined without regularization; ridge/lasso are not enhancements but necessities (Chapter~\ref{sec:bias-variance});
+  \item the classical consistency story must be replaced by sparse-recovery theory: under conditions on $\X$ (restricted eigenvalues) and true sparsity, lasso recovers support and $\ell_2$ error $\asymp \sqrt{s \log p / n}$;
+  \item honest error estimation requires out-of-sample evaluation — with $p$ comparable to $n$, in-sample $R^2$ is close to meaningless.
+\end{itemize}
+
+\subsection{Association is not causation — the assumption nobody writes down}
+
+The linear model estimates conditional associations. Interpreting a coefficient as a causal effect requires an identification strategy (randomization, instrumental variables, difference-in-differences, or unverifiable untestable assumptions like ``no unmeasured confounding''). The machinery of this tutorial says nothing about causality, and no amount of $t$-statistics repairs a broken identification strategy. Say this to yourself every time you open \texttt{lm()}.
+
+\begin{keybox}[The diagnostic loop]
+Plot first, test second, repair third, disclose always: (1) residuals vs.\ fitted (linearity, heteroscedasticity); (2) leverage, residual, influence (outliers); (3) Durbin--Watson or cluster structure (correlation); (4) VIF (collinearity); (5) sample size vs.\ dimension (do you even need regularization). Every failure has a named repair that is a modification of OLS — which is the final, practical answer to why linear regression: it is the hub from which all repairs are one spoke away.
+\end{keybox}

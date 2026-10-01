@@ -1,0 +1,68 @@
+% 第 9 章
+\section{结语：所以，为什么是线性回归？}\label{sec:epilogue}
+
+把八条线索收拢。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      box/.style={draw=blue!50!black, fill=blue!5, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+      kern/.style={draw=green!45!black, fill=green!6, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.5cm, minimum height=1.35cm},
+      net/.style={draw=red!55!black, fill=red!5, rounded corners=2pt,
+                  align=center, inner sep=5pt, text width=3.9cm, minimum height=1.35cm},
+      arr/.style={->, >=Stealth, thick, gray!50!black},
+      lab/.style={midway, font=\scriptsize, fill=white, inner sep=1.5pt}]
+    \node[box] (onedim) at (0,0) {一维：斜率 $=$ 相关系数\\相关 vs 因果\\（第 2 章）};
+    \node[box] (highdim) at (5.1,0) {高维闭式解：投影\\$\bhat=(\X^\top\X)^{-1}\X^\top\y$\\（第 3 章）};
+    \node[box] (gd) at (10.2,0) {迭代视角：GD\\谱滤波、不动点\\（第 4 章）};
+    \node[box] (under) at (10.2,-2.7) {欠定：最小范数解\\$\widehat{\bbeta}'=\X^\top(\X\X^\top)^{-1}\y$\\隐式正则化（第 5 章）};
+    \node[box] (inf) at (5.1,-2.7) {推断：精度矩阵\\条件独立检验\\（第 6 章）};
+    \node[box] (fdr) at (5.1,-5.3) {规模化推断：FDR\\BH 与 knockoffs\\（第 7 章）};
+    \node[kern] (kernel) at (0,-2.7) {核方法：$\x=\phi(z)$\\核 $=$ 内积接口\\（第 8 章）};
+    \node[net] (ntk) at (0,-5.3) {深度网络：随机特征\\ridgeless 回归与 NTK\\（第 8.5 节）};
+    \draw[arr] (onedim) -- (highdim) node[lab]{推广};
+    \draw[arr] (highdim) -- (gd) node[lab]{求逆 $=$ 迭代};
+    \draw[arr] (gd) -- (under) node[lab, right=2pt]{$d>n$};
+    \draw[arr] (under) -- (inf) node[lab]{};
+    \draw[arr] (inf) -- (kernel) node[lab]{};
+    \draw[arr] (inf) -- (fdr) node[lab, right=2pt]{多重检验};
+    \draw[arr] (onedim) -- (kernel) node[lab, left=2pt]{特征映射};
+    \draw[arr] (kernel) -- (ntk) node[lab, left=2pt]{宽极限};
+  \end{tikzpicture}
+  \caption{全书的路线图：一条直线出发，经闭式解与迭代两条路，在欠定情形收拢为最小范数插值，经精度矩阵升级为逐系数的推断，再经多重检验升级为规模化推断（一页结论的可信度），经特征映射核化，最终桥接到深度网络的宽极限。}
+  \label{fig:ch8-roadmap}
+\end{figure}
+
+\textbf{一维线索}：最小二乘把「均值」推广成「直线」，斜率 $\hat{b} = r\,\sigma_y/\sigma_x$ 让相关系数从几何优化中自然浮现；方差分解 $\Var(y) = b^2\Var(x) + \Var(\varepsilon)$ 则说明相关性的实质是方差的转移。同一条直线同时暴露了相关性度量（$r$）的\textit{对称}与回归运算的\textit{方向}（$y \sim x$ 与 $x \sim y$ 是两条线），并以两条回归线的系数之积 $r^2 < 1$ 的形式量化了 Galton 的「回归均值」。而因果方向——$x \to y$、$y \to x$、还是共同原因——产生完全相同的相关结构，只能在数据之外识别\cite{wright1921,reichenbach1956}。
+
+\textbf{高维线索}：当 $n \gg d$，最小二乘给出唯一、全局、闭式的解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$，它是 $\y$ 到列空间的正交投影，且在极弱的误差假设下是 Gauss--Markov 意义的最优线性无偏估计\cite{gauss1823}。当 $n$ 靠近 $d$，方差先坏、秩后坏，岭回归与 lasso 用一笔「偏差预算」换回方差，让同一个框架延续到现代高维统计\cite{hoerl1970,tibshirani1996}。
+
+\textbf{优化线索}：闭式解 $\bhat = (\X^\top\X)^{-1}\X^\top\y$ 与梯度下降 $\widehat{\bbeta}_{t+1} = \widehat{\bbeta}_t - \eta\,\X^\top(\X\widehat{\bbeta}_t - \y)$ 是同一个对象的两条路径——不动点条件 $\nabla L = \zero$ 就是正规方程；把两式联立，迭代解有精确表达式 $\widehat{\bbeta}_t = \bhat + (\bm{I} - \eta\X^\top\X)^t(\widehat{\bbeta}_0 - \bhat)$，收敛条件 $0 < \eta < 2/\lambda_{\max}$ 与最优速率 $(\kappa-1)/(\kappa+1)$ 让「标准化特征」从经验升级为定理。一步到位地求逆，与用 $t$ 次多项式按揭出逆，是同一几何的两张脸。
+
+\textbf{欠定线索}：当 $d > n$，解不再唯一而成流形 $\widehat{\bbeta}' + \mathcal{N}(\X)$，其上每一点都是插值解与 GD 不动点；流形横向吸引、点仅 Lyapunov 稳定，落点由初值的零空间分量决定。$\widehat{\bbeta}' = \X^\top(\X\X^\top)^{-1}\y$ 是流形上唯一的最小范数点——恰为伪逆解 $\X^+\y$；GD 从零点出发隐式收敛于它，ridge 取 $\lambda \to 0^+$ 也收敛于它。\textit{五个面孔（两个闭式公式、伪逆、GD 零点极限、ridge 零极限）是同一个最小范数最小二乘解}——过参数化时代「不罚而正则」的线性原型。
+
+\textbf{推断线索}：回归系数是精度矩阵的元素，$\beta_j = 0 \Leftrightarrow y \perp x_j \mid \x_{-j}$——一维的「相关 vs 因果」升级为图模型上的条件独立语言\cite{lauritzen1996}；lasso、elastic net、graphical lasso、CLIME 在 $d \gg n$ 下给出稀疏估计，debiased lasso 把点估计升级为渐近正态推断——\textit{estimate 回答「哪些边可能存在」，inference 回答「这条边是否显著」}\cite{meinshausen2006,zou2005,friedman2008,cai2011,zhang2014,vandegeer2014}。
+
+\textbf{FDR 线索}：单个系数的 $p$ 值之外，应用科学家面对的是一整页同时检验的结论。Bonferroni 把阈值压到 $\alpha/m$，功效随 $m$ 崩塌；Benjamini--Hochberg 用一条斜线 $qk/m$ 换取「在发现多的前提下容忍少量假的」，把假发现比例的期望控制在 $q$ 以下\cite{benjamini1995}；更令人满意的是，BH 阈值恰是对 $z$ 分数的自适应稀疏估计，与第 6 章的软阈值同源——\textit{控制假发现率不是估计之外的补丁，而是稀疏性假设在检验问题上的对偶}\cite{abramovich2006}。Knockoffs 则换一条更彻底的路：在设计矩阵里造影子变量，用交换对称性直接控制变量选择的 FDR，不依赖任何 $p$ 值的渐近理论\cite{barber2015}。\textit{estimate 说哪些边可能存在，inference 说哪些边显著，FDR 说这一页里可以信几个}。
+
+\textbf{核线索}：当观测特征是潜变量非线性投影 $\x_i = \phi(\bm{z}_i)$，两个闭式解的预测——$d > n$ 的 $\tilde{\x}^\top\widehat{\bbeta}' = \bm{k}(\tilde{\bm{z}})^\top \bm{K}^{-1}\y$ 与 $n \gg d$ 的 $\tilde{\x}^\top\bhat^{\mathrm{ridge}} = \bm{k}(\tilde{\bm{z}})^\top(\bm{K} + \lambda\bm{I})^{-1}\y$——都只由核函数组装：线性于特征 $\Leftrightarrow$ 非线性于潜空间，核化与 push-through 是同一枚硬币的两面\cite{scholkopf2002,kimeldorf1970,rahimi2007}。
+
+\textbf{历史线索}：从 Legendre 与 Gauss 为谷神星轨道而写下的附录\cite{legendre1805,gauss1809}，到 Galton 的身高散点图\cite{galton1886}，再到今天的每一个回归输出层——熬过了这一切的，不是一个技巧，而是一个关于「数据如何遇见模型」的定理。
+
+\begin{keybox}[最终答案]
+因为线性回归是\textbf{唯一}同时做到以下四点的模型：
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{可精确求解}：凸二次问题，闭式解，毫秒级，无超参数、无局部极小；
+  \item \textbf{可解释}：每个系数有话可说，$R^2$、杠杆、自由度各有几何意义；
+  \item \textbf{可审计}：每个定理都有明确的假设清单，假设失效时有具名的诊断与修复；
+  \item \textbf{可推广}：换损失得稳健回归，加惩罚得岭/lasso，加特征得非线性，迭代加权得 GLM，堆叠训练得神经网络。
+\end{enumerate}
+先拟合直线，审计假设，诚实披露弱点——然后，并且只有在这之后，才轮到更花哨的模型。
+\end{keybox}
+
+\begin{exercise}\label{ex:orth-ridge}
+设 $\X^\top\X = n\bm{I}$（正交设计）。求使 $\MSE(\hat\beta_j^{\mathrm{ridge}})$ 最小的 $\lambda^\star$，并证明 $\lambda^\star > 0$ 当且仅当该系数是「弱信号」；由此解释「收缩从不伤害强信号、总帮助弱信号」的精确含义。
+\end{exercise}

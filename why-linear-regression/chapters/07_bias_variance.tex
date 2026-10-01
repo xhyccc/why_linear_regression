@@ -1,0 +1,102 @@
+% Chapter 7
+\section{The Bias--Variance Trade-off and Regularization}\label{sec:bias-variance}
+
+Gauss--Markov crowned OLS among unbiased estimators. This chapter asks the impolite question: what if we allow a little bias? The answer reframes 40 years of statistical practice — ridge, lasso, subset selection — as one principle: trade a controlled amount of bias for a larger cut in variance.
+
+\subsection{Decomposing the error of an estimator}
+
+For any estimator $\tilde{\theta}$ of a parameter $\theta$, with data randomness only:
+\begin{equation}\label{eq:bv}
+  \E\big[(\tilde{\theta} - \theta)^2\big]
+  = \underbrace{\big(\E[\tilde{\theta}] - \theta\big)^2}_{\text{bias}^2}
+  + \underbrace{\E\big[(\tilde{\theta} - \E[\tilde{\theta}])^2\big]}_{\text{variance}}.
+\end{equation}
+Proof: add and subtract $\E[\tilde\theta]$, cross terms cancel. Nothing here is specific to regression — but applied to a predictor $\hat{f}(x)$ at a point $x_0$, with responses following $y = f(x) + \varepsilon$, $\E[\varepsilon]=0$, $\Var(\varepsilon)=\sigma^2$:
+\begin{equation}\label{eq:bv-pred}
+  \E\big[(y_0 - \hat{f}(x_0))^2\big]
+  = \underbrace{\sigma^2}_{\text{irreducible}}
+  + \underbrace{\big(f(x_0) - \E[\hat{f}(x_0)]\big)^2}_{\text{bias}^2}
+  + \underbrace{\Var(\hat{f}(x_0))}_{\text{variance}}.
+\end{equation}
+The irreducible term is the dice-roll of Chapter~\ref{sec:probability}; the other two are ours to manage. \emph{Flexible models have low bias and high variance; rigid models have high bias and low variance.} Prediction accuracy is optimized in the middle — not by fitting the truth best, but by balancing the two.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.05, >=Stealth]
+  \draw[->] (0,0) -- (8.4,0) node[below left] {model flexibility $\longrightarrow$};
+  \draw[->] (0,0) -- (0,4.6) node[rotate=90, above, anchor=south east, yshift=2pt] {expected prediction error};
+  % curves
+  \draw[very thick, color=red!70!black, domain=0.2:8.2, smooth] plot (\x, {4.2*exp(-0.45*\x) + 0.35});
+  \node[color=red!70!black] at (1.15,3.9) {bias$^2$};
+  \draw[very thick, color=accent, domain=0.2:8.2, smooth] plot (\x, {0.25 + 0.05*\x^2/2});
+  \node[color=accent] at (7.35,2.5) {variance};
+  \draw[very thick, domain=0.2:8.2, smooth] plot (\x, {4.2*exp(-0.45*\x) + 0.35 + 0.25 + 0.05*\x^2/2});
+  \node at (4.6,4.6) {total error};
+  \draw[dashed] (3.6,0) -- (3.6,2.83);
+  \fill[black] (3.6,2.83) circle (1.6pt);
+  \node[below] at (3.6,0) {sweet spot};
+\end{tikzpicture}
+\caption{The bias--variance trade-off. As flexibility grows, squared bias falls fast while variance rises slowly at first, then explosively; their sum has a minimum. Regularization slides a model along this curve by tuning its rigidity.}
+\label{fig:ucurve}
+\end{figure}
+
+\subsection{Ridge regression: shrinkage with a closed form}
+
+OLS minimizes $\norm{\y - \X\bbeta}^2$. \textbf{Ridge regression} adds a quadratic penalty on the coefficients:
+\begin{equation}\label{eq:ridge}
+  \bhat^{\mathrm{ridge}} = \arg\min_{\bbeta} \; \norm{\y - \X\bbeta}^2 + \lambda \norm{\bbeta}^2,
+  \qquad \lambda \geq 0.
+\end{equation}
+The penalty shrinks coefficients toward zero; $\lambda$ controls the rigidity. Setting the gradient to zero (Exercise~\ref{ex:ridge}) gives the closed form
+\begin{equation}\label{eq:ridge-sol}
+  \bhat^{\mathrm{ridge}} = (\X^\top \X + \lambda \bm{I})^{-1} \X^\top \y.
+\end{equation}
+Three observations, in increasing depth:
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{Numerics}: even when $\X^\top\X$ is singular, $\X^\top\X + \lambda\bm{I}$ is positive definite for any $\lambda > 0$ — ridge \emph{always} has a unique solution. Chapter~\ref{sec:ls}'s numerical trick is Chapter~\ref{sec:bias-variance}'s statistical idea.
+  \item \textbf{Geometry}: \eqref{eq:ridge} is a constrained problem — minimize $\norm{\y-\X\bbeta}^2$ subject to $\norm{\bbeta}^2 \leq c$ — whose Lagrangian is \eqref{eq:ridge}. In parameter space, the elliptical contours of the loss meet the ball of radius $\sqrt{c}$; the contact point is interior, biased, and stabler. Correlated features share the coefficient budget instead of fighting over it (Section~\ref{sec:geometry}).
+  \item \textbf{Statistics}: with the singular value decomposition $\X = \bm{U}\bm{D}\bm{V}^\top$,
+  \[
+    \bhat^{\mathrm{ridge}} = \bm{V} \, \mathrm{diag}\!\left(\frac{d_j}{d_j^2 + \lambda}\right) \bm{U}^\top \y,
+    \qquad
+    \bhat^{\mathrm{OLS}} = \bm{V} \, \mathrm{diag}\!\left(\frac{1}{d_j}\right) \bm{U}^\top \y,
+  \]
+  where $d_j$ are the singular values. Ridge replaces each fragile factor $1/d_j$ by $d_j/(d_j^2 + \lambda) < 1/d_j$: \emph{it tames exactly the small-$d_j$ (ill-conditioned, high-variance) directions that OLS amplifies}. Viewed through the hat matrix, ridge shrinks the singular values of the projection from $1$ toward $0$; the effective degrees of freedom, $\sum_j d_j^2/(d_j^2 + \lambda) < p+1$, shrink continuously with $\lambda$.
+\end{enumerate}
+
+\subsection{Mean-squared-error optimality of shrinkage}
+
+Ridge is biased — so why can it beat BLUE? Compute its MSE in the orthogonal-design case $\X^\top\X = \bm{I}$ (to see the structure without clutter), where
+\[
+  \bhat^{\mathrm{ridge}}_j = \frac{1}{1+\lambda}\, \hat{\beta}_j^{\mathrm{OLS}}.
+\]
+Then $\bias_j = -\frac{\lambda}{1+\lambda}\beta_j$ and $\Var_j = \frac{\sigma^2}{(1+\lambda)^2}$, so
+\[
+  \MSE_j(\lambda) = \frac{\lambda^2 \beta_j^2 + \sigma^2}{(1+\lambda)^2}.
+\]
+Differentiate at $\lambda = 0$: the MSE \emph{decreases} for any small $\lambda > 0$ whenever $\beta_j^2 < \sigma^2$ — i.e., \emph{shrinking a weak signal beats estimating it honestly}. There exists $\lambda^\star > 0$ with $\MSE(\lambda^\star) < \MSE(0) = \MSE(\mathrm{OLS})$ for every $\bbeta$. This is the regression shadow of Stein's paradox: the unbiased estimator is inadmissible; a little bias buys a better estimator, for every parameter value simultaneously. Gauss--Markov does not contradict this — it simply refuses to enter the biased class where the improvement lives.
+
+\subsection{Lasso and sparsity: a different penalty, a different bet}
+
+Ridge penalizes the \emph{squared} norm; the \textbf{lasso} penalizes the \emph{absolute} norm:
+\begin{equation}\label{eq:lasso}
+  \bhat^{\mathrm{lasso}} = \arg\min_{\bbeta} \; \tfrac{1}{2}\norm{\y - \X\bbeta}^2 + \lambda \norm{\bbeta}_1.
+\end{equation}
+Same bias--variance principle, different geometry: the $\ell_1$ constraint region is a diamond with corners on the coordinate axes, and minima tend to occur \emph{at the corners} — i.e., with some coefficients \emph{exactly zero}. Lasso does variable selection automatically. The price: no closed form, and (in general) biased even for large signals; the gain: an interpretable sparse model, and (under ``irrepresentability'' conditions on $\X$) consistent selection of the true support as $n \to \infty$. Ridge bets all coefficients are small; lasso bets most are zero. Which bet wins is a property of the world, not of the math — and cross-validation is the honest way to find out.
+
+\subsection{Choosing $\lambda$: cross-validation, honestly done}
+
+Regularization converts one model into a one-parameter family indexed by $\lambda$. The bias--variance picture says the best $\lambda$ minimizes \emph{expected} prediction error, which we cannot compute — but we can estimate it:
+
+\begin{enumerate}[label=(\alph*)]
+  \item Split the data into $K$ folds. For each fold, fit on the other $K-1$ and evaluate the held-out error.
+  \item Average the $K$ held-out errors: the cross-validation estimate of prediction error at that $\lambda$.
+  \item Pick $\hat{\lambda}$ minimizing the curve; refit on all data; report honest uncertainty (one standard error up the curve is a fine, slightly more parsimonious choice).
+\end{enumerate}
+
+The logic is bias--variance again: the training error is a badly biased estimate of prediction error (it rewards overfitting — flexibility in Figure~\ref{fig:ucurve}), while a fresh test set is unbiased but expensive; cross-validation is the practical compromise. Every claim in this chapter about choosing flexibility is operationalized by this loop.
+
+\begin{keybox}[Chapter verdict]
+Squared error decomposes into bias and variance; unbiasedness is not the goal, \emph{MSE} is. Shrinkage estimators (ridge, lasso) deliberately incur bias to cut variance, taming the exact ill-conditioned directions OLS amplifies. The tuning parameter selects a point on the bias--variance curve, and cross-validation estimates that point from data. Modern machine learning is, to a first approximation, this one idea scaled up.
+\end{keybox}

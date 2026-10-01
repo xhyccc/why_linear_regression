@@ -1,0 +1,101 @@
+% Chapter 6
+\section{The Probabilistic View: Distributions, Tests, and Intervals}\label{sec:probability}
+
+Gauss--Markov made OLS optimal with no distribution for the errors. But ``$\bhat$ has the smallest covariance'' does not yet let us say ``the slope is nonzero with 95\% confidence.'' For inference — hypothesis tests, confidence intervals, prediction intervals — we must know what distribution $\bhat$ follows, and that requires one more assumption.
+
+\subsection{Adding Gaussian errors: the normal linear model}
+
+\begin{keybox}[Assumption (A4)]
+Conditional on $\X$, the errors are jointly Gaussian:
+\[
+  \bm{\varepsilon} \mid \X \sim \mathcal{N}_n(\zero, \sigma^2 \bm{I}_n),
+  \qquad\text{equivalently}\qquad
+  \y \mid \X \sim \mathcal{N}_n(\X \bbeta, \sigma^2 \bm{I}_n).
+\]
+Together, (A1)--(A4) define the \emph{normal linear model}. Under (A4), maximum likelihood and least squares coincide (Section~\ref{sec:why-squared-mle}).
+\end{keybox}
+
+\subsection{Exact distributions of the estimators}
+
+\begin{theorem}[Distribution of $\bhat$]\label{thm:dist-bhat}
+Under (A1)--(A4),
+\[
+  \bhat \mid \X \sim \mathcal{N}_{p+1}\big(\bbeta, \; \sigma^2 (\X^\top \X)^{-1}\big).
+\]
+Hence each standardized coefficient is standard normal:
+\[
+  \frac{\hat{\beta}_j - \beta_j}{\sigma \sqrt{[(\X^\top\X)^{-1}]_{jj}}} \sim \mathcal{N}(0, 1).
+\]
+\end{theorem}
+\begin{proof}
+$\bhat = \bbeta + (\X^\top\X)^{-1}\X^\top \bm{\varepsilon}$ is an affine transformation of a jointly Gaussian vector, hence jointly Gaussian, with mean and covariance already computed in Lemma~\ref{lem:unbiased}.
+\end{proof}
+
+The catch: the standardization uses the unknown $\sigma$. Estimating it is the one place where genuine probability theory (the chi-square and $t$ distributions) is unavoidable.
+
+\begin{theorem}[$\chi^2$ distribution of the residual sum of squares]\label{thm:chi2}
+Under (A1)--(A4), with $\bm{M} := \bm{I} - \bm{H}$ the residual-maker projection,
+\[
+  \frac{\norm{\bm{e}}^2}{\sigma^2} = \frac{\bm{\varepsilon}^\top \bm{M} \, \bm{\varepsilon}}{\sigma^2} \;\sim\; \chi^2_{\,n-p-1},
+  \qquad\text{and}\quad \bhat \text{ is independent of } \norm{\bm{e}}^2.
+\]
+\end{theorem}
+\begin{proof}[Proof sketch]
+By the spectral theorem (proof of Lemma~\ref{lem:trace}), a symmetric idempotent matrix $\bm{M}$ has an eigendecomposition $\bm{M} = \bm{U} \bm{\Lambda} \bm{U}^\top$ with $\bm{U}$ orthogonal and $\bm{\Lambda} = \mathrm{diag}(\underbrace{1,\dots,1}_{n-p-1}, 0, \dots, 0)$. So
+\[
+  \frac{\norm{\bm{e}}^2}{\sigma^2} = \frac{\bm{\varepsilon}^\top \bm{M} \bm{\varepsilon}}{\sigma^2}
+  = \sum_{k=1}^{n-p-1} \underbrace{\frac{(\bm{u}_k^\top \bm{\varepsilon})^2}{\sigma^2}}_{\sim\, \chi^2_1 \text{, i.i.d.}},
+\]
+a sum of $n-p-1$ independent squared standard normals — a $\chi^2_{n-p-1}$. Independence of $\bhat$ and $\bm{e}$ follows because jointly Gaussian vectors are independent iff uncorrelated, and $\Cov(\bhat, \bm{e} \mid \X) = (\X^\top\X)^{-1}\X^\top \cdot \sigma^2\bm{I} \cdot \bm{M} = \sigma^2 (\X^\top\X)^{-1} \X^\top \bm{M} = \zero$ (since $\X^\top \bm{M} = \X^\top - \X^\top\X(\X^\top\X)^{-1}\X^\top = \zero$).
+\end{proof}
+
+\begin{corollary}[$t$-distribution for coefficients]\label{cor:t}
+With $\hat{\sigma}^2 = \norm{\bm{e}}^2 / (n-p-1)$,
+\[
+  T_j = \frac{\hat{\beta}_j - \beta_j}{\hat{\sigma}\sqrt{[(\X^\top\X)^{-1}]_{jj}}} \;\sim\; t_{\,n-p-1}.
+\]
+\end{corollary}
+\begin{proof}
+$T_j$ is the ratio of an independent standard normal (numerator, Theorem~\ref{thm:dist-bhat}) to the square root of an independent $\chi^2_{n-p-1}$ divided by its degrees of freedom (denominator, Theorem~\ref{thm:chi2}) — the definition of a $t_{n-p-1}$ variable.
+\end{proof}
+
+Corollary~\ref{cor:t} is the source of every ``\texttt{coef std err t p-value}'' table ever printed by statistical software: the $t$-statistic for $H_0: \beta_j = 0$, the two-sided $p$-value $2\Pr(|t_{n-p-1}| \geq |T_j^{\mathrm{obs}}|)$, and the confidence interval $\hat{\beta}_j \pm t_{n-p-1,\,1-\alpha/2} \cdot \widehat{\mathrm{se}}_j$. Nothing in that table is ad hoc; it all falls out of (A1)--(A4).
+
+\subsection{The $F$-test: comparing nested models}
+
+Individual $t$-tests ask whether one coefficient is zero. The $F$-test asks whether a \emph{block} of coefficients — i.e., a whole sub-model — is zero. Partition $\bbeta = (\bbeta_1, \bbeta_2)$ with $\bbeta_2 \in \R^{q}$, and test $H_0: \bbeta_2 = \zero$. Let $\mathrm{RSS}_0$ = residual sum of squares of the restricted fit (drop the last $q$ columns), $\mathrm{RSS}_1$ = full fit's.
+
+\begin{theorem}[$F$-statistic]\label{thm:F}
+Under $H_0$ and (A1)--(A4),
+\[
+  F = \frac{(\mathrm{RSS}_0 - \mathrm{RSS}_1)/q}{\mathrm{RSS}_1/(n-p-1)} \;\sim\; F_{q,\, n-p-1}.
+\]
+\end{theorem}
+\begin{proof}[Proof idea]
+Both numerator and denominator are independent (same Gram-matrix argument as Theorem~\ref{thm:chi2}) $\chi^2$ variables divided by their degrees of freedom — precisely an $F$ ratio. Under $H_0$, $\mathrm{RSS}_0 - \mathrm{RSS}_1 = \norm{\bm{e}_0}^2 - \norm{\bm{e}_1}^2$ is the squared length of the projection of $\y$ onto the $q$-dimensional orthogonal complement of $\mathcal{C}(\X_1)$ inside $\mathcal{C}(\X)$: another projection, another $\chi^2_q$.
+\end{proof}
+
+The $F$-test of $q = p$ restrictions is exactly the test of ``$R^2 = 0$'' — the overall regression $F$ printed at the bottom of every regression table.
+
+\subsection{Prediction intervals vs.\ confidence intervals}
+
+Two different questions are often confused:
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Confidence interval for the mean response} at $\x_0$: $\x_0^\top \bhat \pm t \cdot \hat{\sigma}\sqrt{\x_0^\top (\X^\top\X)^{-1} \x_0}$. This brackets the \emph{line's height} $\E[y \mid \x_0]$; uncertainty shrinks as $n \to \infty$ (estimation error vanishes).
+  \item \textbf{Prediction interval for a new observation} at $\x_0$: same center, width $\hat{\sigma}\sqrt{1 + \x_0^\top (\X^\top\X)^{-1} \x_0}$. The extra ``$+1$'' is the irreducible noise $\varepsilon_0$: even with infinite data, a new $y_0$ scatters $\sigma$ around the line. No amount of data removes it.
+\end{enumerate}
+
+The distinction is a quantitative statement of a philosophical one: models can converge to the truth, but the world keeps rolling dice.
+
+\subsection{When (A4) fails: the central limit theorem to the rescue}
+
+Real errors are rarely exactly Gaussian. Why do the tables above still work? Because $\bhat - \bbeta = (\X^\top\X)^{-1}\X^\top \bm{\varepsilon}$ is a \emph{sum} of many small contributions, and sums tend to Gaussianity by the Lindeberg--L\'evy central limit theorem: under mild moment conditions and a design that does not let any single observation dominate,
+\[
+  (\X^\top \X)^{1/2} \, \frac{\bhat - \bbeta}{\sigma} \;\xrightarrow{d}\; \mathcal{N}(\zero, \bm{I}).
+\]
+Hence the $t$- and $F$-tables are \emph{asymptotically} valid even without (A4) — this is the justification for all large-sample inference in regression, and the rigorous form (with heteroscedasticity-consistent ``sandwich'' standard errors replacing $\hat\sigma^2(\X^\top\X)^{-1}$ when (A3) also fails) underlies modern econometrics.
+
+\begin{keybox}[What probability adds to the geometry]
+Geometry gives the estimator; probability gives its \emph{distribution}. Under Gaussian errors the exact $t$-, $\chi^2$-, and $F$-distributions follow from one argument repeated three times: \emph{a projection of Gaussian noise is Gaussian on a subspace, and independent on orthogonal subspaces}. Without Gaussianity, the CLT restores the same inference asymptotically.
+\end{keybox}

@@ -1,0 +1,30 @@
+% 前言
+\section*{前言}\label{sec:preface}
+\addcontentsline{toc}{section}{前言}
+
+\subsection*{这本书写给谁}
+
+这本教程写给\textbf{有一定数学基础的 applied scientists 和 data scientists}——你学过线性代数和微积分，日常用 \texttt{lm()}、\texttt{LinearRegression()} 或 \texttt{np.linalg.lstsq} 解决实际问题，但隐隐觉得「会用」和「理解」之间隔着一层窗户纸：为什么斜率恰好是相关系数？为什么平方损失而不是绝对值？$d > n$ 时训练误差为零的模型凭什么能泛化？核方法和我的线性回归是什么关系？
+
+如果你有这样的疑问，这本书就是为你写的。它不教你调包（那是文档的工作），它把每一个公式从头推给你看，并告诉你每个定理背后的\textbf{假设清单}——因为假设才是统计学的本体，公式只是影子。全文只需本科程度的微积分与线性代数加基础概率；所有结论都可从头验证，书末附有全部习题的完整解答。
+
+\subsection*{缘起与影响}
+
+这本书的写作是\textbf{一时兴起}——某个晚上，作者想把脑子里盘了很久的「为什么学线性回归」一口气写出来，于是一章一章写到了第 8 章。但它的「兴」背后，是长期阅读一批科学家工作的积累。七位影响最深的学者是：\textbf{Francis Bach}（Inria），他的教科书 \emph{Learning Theory from First Principles}（2024）\cite{bach2024} 与本书「每个结果都从第一性原理挣出来」的气质一脉相承，第 \ref{sec:kernel} 章的核方法视角与第 \ref{sec:gd}--\ref{sec:gd-underdet} 章优化--统计互通的写法都受其影响；\textbf{Ryan Tibshirani}（斯坦福大学），他把 generalized lasso、trend filtering、conformal prediction 做成了「既可计算、又可审计」的方法论，这正是本书第 \ref{sec:ggm} 章 estimate-to-inference 路线的精神；\textbf{Jingfeng Wu}（UC Berkeley Simons Institute），他关于「gradient descent dominates ridge regression」的工作\cite{wu2025}正是本书第 \ref{sec:gd}--\ref{sec:implicit} 章迭代--正则化故事的统计学前沿；\textbf{Arthur Jacot}（纽约大学 Courant 研究所），他提出的神经正切核（NTK）\cite{jacot2018} 把「线性回归 $\to$ 核回归 $\to$ 深度网络」焊成了一条完整的路，即本书第 \ref{sec:ntk} 节；\textbf{Jianqing Fan}（普林斯顿大学），他的高维统计体系\cite{fan2020}——稀疏估计、变量筛选、大协方差矩阵——是本书第 \ref{sec:ggm} 章从估计到推断这条路线图的来源；\textbf{David Donoho}（斯坦福大学），压缩感知（compressed sensing）的奠基人，他证明 $\ell_1$ 极小化能以最优方式利用稀疏性、欠定方程组在稀疏假设下可解\cite{donoho2006}——本书第 \ref{sec:sparsity} 节「稀疏性是可计算的假设」正是这一思想的统计学表达；\textbf{Emmanuel Candès}（斯坦福大学），与 Donoho、Tao 共创压缩感知的精确恢复理论，又以 knockoffs 框架给出了复杂模型下可复现的变量选择与错误发现率（FDR）控制\cite{barber2015}——这是本书第 \ref{sec:debiased} 节「点估计如何升级为可检验的推断」之后的现代下一站。
+
+\subsection*{写作方式与一份诚实的免责声明}
+
+\textbf{这本书大量使用了 AI 辅助写作。} 具体而言，正文由 Moonshot AI 的 Kimi K2.8 模型在 \textbf{Kimi Work 桌面版}的 Agent 模式下完成——由它直接编写 LaTeX 源码、编译 PDF、渲染检查、逐页校对；人类专家（Haoyi Xiong）给出 outline、章节内容与自己的思考，尤其是他对线性回归多年的理解、以及他自己曾专门研究过的几个点（如欠定情形梯度下降的精确解、latent 投影下的核方法视角、精度矩阵与条件独立的联系）。一句话分工：\textit{人类负责「问什么」和「信不信」，机器负责「写出来」和「查出来」}。
+
+因此请读者注意以下三点：
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{线性回归这个领域非常大}，本书没有、也不可能覆盖全部：广义线性模型、稳健回归、混合效应模型、时间序列、贝叶斯路线、在线学习、联邦场景……每一样都配得上自己的一本 deep-dive。本书只覆盖作者认为「不答就不诚实」的那条主线。
+  \item \textbf{本书的理论部分并不追求专业严格}。所有公式都正确、可推导，但证明显然不是教科书级别的完备（比如渐近结果的正则条件一律从略）。\textit{做理论研究的读者请跳过本书}；初学或没系统接触过的读者，可以把它当作一份有推导的科普放心阅读。
+  \item \textbf{历史与文献部分尽力核实}（主要人物、年份与出处均经联网查证并在参考文献中标注），但若有讹误，责任在人类作者，欢迎指正。
+\end{enumerate}
+
+先拟合直线，审计假设，诚实披露弱点——这本书自己也照此办理。
+
+\vspace{1em}
+\hfill 熊昊一 (Haoyi Xiong)，于北京

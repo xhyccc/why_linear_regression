@@ -1,0 +1,65 @@
+% Chapter 1
+\section{Introduction: The Most Important Model You Will Ever Learn}\label{sec:intro}
+
+\subsection{The question this tutorial answers}
+
+Every machine-learning course, every statistics textbook, and every data-science bootcamp introduces linear regression within the first two weeks. And almost all of them do it backwards: they hand you a formula,
+\[
+  \hat{\beta} = (\X^\top \X)^{-1} \X^\top \y,
+\]
+tell you to trust it, and move on to ``more exciting'' models.
+
+This tutorial goes the other way. We will earn every step. By the end you will be able to answer, from first principles:
+
+\begin{enumerate}[label=(\arabic*)]
+  \item Why do we fit a \emph{line} (or hyperplane) at all? What is the underlying assumption, and how strong is it?
+  \item Why \emph{squared} error? Why not absolute error, or error to the fourth power?
+  \item Where does the magic formula $\hat{\beta} = (\X^\top\X)^{-1}\X^\top\y$ come from, and what does it mean geometrically?
+  \item Under what conditions is the ordinary least squares (OLS) estimator the \emph{best} estimator? (Answer: the Gauss--Markov theorem.)
+  \item What do we gain — and what do we quietly assume — when we view regression through probability (maximum likelihood)?
+  \item Why does adding a penalty term (ridge, lasso) help, and what does the bias--variance trade-off have to do with it?
+  \item Why does a 200-year-old linear method still sit underneath logistic regression, neural networks, and half of modern statistics?
+\end{enumerate}
+
+\subsection{A 200-year-old idea that refuses to die}
+
+Least squares was published independently by Legendre (1805) and Gauss (1809), who used it to predict the orbit of the asteroid Ceres from noisy astronomical observations. The method has survived every paradigm shift since: the computer, the bootstrap, the deep-learning revolution. There is a reason.
+
+\begin{keybox}[Thesis of this tutorial]
+Linear regression is not popular because real-world relationships are linear. They rarely are. It is popular because
+\begin{enumerate}[label=(\roman*)]
+  \item a local linear approximation is often good enough (Taylor's theorem);
+  \item it is the \emph{uniquely solvable, uniquely interpretable, uniquely honest} baseline — everything else is measured against it;
+  \item it is the exact foundation on which logistic regression, generalized linear models, kernel methods, and even neural networks are built.
+\end{enumerate}
+\end{keybox}
+
+\subsection{What you need to know before starting}
+
+\begin{itemize}
+  \item \textbf{Calculus}: partial derivatives, the chain rule, and the fact that a minimum of a smooth function occurs where its derivative is zero.
+  \item \textbf{Linear algebra}: vectors, matrices, matrix multiplication, transpose, inverse; matrix-vector products as linear combinations. Appendix~\ref{app:linalg} collects everything we use.
+  \item \textbf{Probability} (helpful, not required until Chapter~\ref{sec:probability}): expectation, variance, the Gaussian distribution.
+\end{itemize}
+
+Everything else is derived here.
+
+\subsection{The setup, stated once and for all}
+
+We are given $n$ observations. Each observation $i$ consists of a \emph{response} (target, dependent variable) $y_i \in \R$ and $p$ \emph{features} (predictors, covariates, independent variables) $x_{i1}, \dots, x_{ip} \in \R$. We believe the responses were generated as
+\begin{equation}\label{eq:model}
+  y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \dots + \beta_p x_{ip} + \varepsilon_i,
+  \qquad i = 1, \dots, n,
+\end{equation}
+where $\beta_0, \dots, \beta_p$ are unknown constants we want to estimate, and $\varepsilon_i$ is an \emph{error term} capturing everything the line misses: measurement noise, omitted variables, genuine randomness, and the sin of approximating a nonlinear world with a hyperplane.
+
+In matrix form, with $\X \in \R^{n \times (p+1)}$ the design matrix whose $i$-th row is $(1, x_{i1}, \dots, x_{ip})$, $\bbeta \in \R^{p+1}$ the parameter vector, and $\bm{\varepsilon} \in \R^n$ the errors:
+\begin{equation}\label{eq:model-matrix}
+  \y = \X \bbeta + \bm{\varepsilon}.
+\end{equation}
+
+The whole game of this tutorial is understanding what the words ``linear'' and ``error'' really commit us to, and what the best possible estimate of $\bbeta$ is under each interpretation.
+
+\begin{remark}[Linear in \emph{what}?]
+``Linear'' in \emph{linear regression} means linear in the \emph{parameters} $\beta_j$, not necessarily linear in the raw features. The model $y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 \sin x + \varepsilon$ is perfectly linear by our definition: define the new features $\tilde{x}_1 = x$, $\tilde{x}_2 = x^2$, $\tilde{x}_3 = \sin x$ and it has the form of \eqref{eq:model}. What is \emph{not} linear is $y = \beta_0 + e^{\beta_1 x} + \varepsilon$. This flexibility — turning nonlinear relationships into linear ones by feature engineering — is a recurring theme (Chapter~\ref{sec:beyond}).
+\end{remark}

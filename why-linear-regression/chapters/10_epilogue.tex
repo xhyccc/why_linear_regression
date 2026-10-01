@@ -1,0 +1,29 @@
+% Chapter 10
+\section{Epilogue: So, Why Linear Regression?}\label{sec:epilogue}
+
+We set out to answer one question. The answer turned out to be seven answers, each a different lens on the same object.
+
+\subsection{The seven answers, collected}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Because it is exactly solvable.} Squared error turns estimation into a convex quadratic problem with a unique, closed-form, computable-in-milliseconds answer (Chapter~\ref{sec:ls}). No initialization, no local minima, no hyperparameters to speak of.
+  \item \textbf{Because squared error is principled, not habitual.} It is the MLE under Gaussian noise, the partner of the maximum-entropy error model, and uniquely tractable; and its known weakness (outliers) has named, classical repairs (Chapter~\ref{sec:why-squared}).
+  \item \textbf{Because it is the right projection.} Geometrically, OLS is the orthogonal projection of data onto the model's subspace; the normal equations, the hat matrix, $R^2$, and degrees of freedom are all one picture (Chapter~\ref{sec:geometry}).
+  \item \textbf{Because it is provably optimal in its class.} Gauss--Markov: under correct specification, full rank, and homoscedastic uncorrelated errors, no linear unbiased estimator beats it — with zero distributional assumptions (Chapter~\ref{sec:gauss-markov}).
+  \item \textbf{Because it supports exact inference.} Add Gaussian errors and the whole apparatus of $t$-, $\chi^2$-, and $F$-distributions follows from one repeated argument about projections of Gaussian noise; remove Gaussianity and the CLT restores it asymptotically (Chapter~\ref{sec:probability}).
+  \item \textbf{Because it knows its own limits.} The bias--variance decomposition tells you exactly what OLS's unbiasedness costs, and ridge/lasso/cross-validation are the controlled repairs — the same mathematics that underlies modern machine learning (Chapter~\ref{sec:bias-variance}).
+  \item \textbf{Because everything else is built on it.} Feature expansion, kernels, GLMs, IRLS, and the output layer of neural networks are all linear regression, iterated or extended (Chapter~\ref{sec:beyond}).
+\end{enumerate}
+
+\subsection{The deeper reason}
+
+Strip away the theorems and one fact remains: the conditional mean $\E[y \mid \x]$ is \emph{the} function that minimizes expected squared prediction error, and the linear model is its simplest honest approximation — two parameters stand between you and a principled answer, interpretable, uncertainty-quantified, falsifiable. Every model in statistics and machine learning is, at bottom, an answer to the same question with different machinery for approximating that conditional mean. Linear regression is the baseline against which all of them are measured, the exact special case in which every quantity can be derived and every assumption audited, and the hub to which every repair routes back.
+
+Legendre published least squares in 1805 to fit orbits from noisy asteroid observations. Two hundred and twenty years later, the same formula fits neural network output layers, genome-wide association studies, and econometric policy evaluation. Anything that survives that much change is not a technique — it is a theorem about how data meets models. That is why linear regression.
+
+\vspace{1.5em}
+\begin{center}
+\itshape
+Fit the line. Audit the assumptions. \\
+Disclose the weaknesses. Then — and only then — reach for something fancier.
+\end{center}

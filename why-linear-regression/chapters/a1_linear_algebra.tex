@@ -1,0 +1,54 @@
+% Appendix A
+\section{Linear Algebra Facts Used in This Tutorial}\label{app:linalg}
+
+Everything below is standard; proofs are sketched where they clarify.
+
+\subsection{Notation}
+
+Matrices $\bm{A}, \bm{B}, \dots$ are uppercase bold; vectors lowercase bold; scalars plain. $\bm{A}^\top$ = transpose; $\bm{A}^{-1}$ = inverse (when it exists); $\bm{A}^{+}$ = Moore--Penrose pseudoinverse. $\bm{I}_n$ = $n \times n$ identity. $\norm{\bm{v}} = \sqrt{\bm{v}^\top \bm{v}}$ = Euclidean norm; $\bm{u} \perp \bm{v}$ means $\bm{u}^\top \bm{v} = 0$.
+
+\subsection{Matrix multiplication: two readings}
+
+The product $\bm{C} = \bm{A}\bm{B}$ can be read \emph{by entries} ($C_{ik} = \sum_j A_{ij} B_{jk}$) or \emph{by columns}: column $k$ of $\bm{C}$ is $\bm{A}$ times column $k$ of $\bm{B}$ — a linear combination of $\bm{A}$'s columns. The second reading drives this tutorial: $\X \bbeta$ is the linear combination of predictors with weights $\bbeta$, and $\mathcal{C}(\X)$ is the set of all such combinations.
+
+\subsection{Transpose rules}
+
+$(\bm{A}\bm{B})^\top = \bm{B}^\top \bm{A}^\top$; $(\bm{A}^\top)^\top = \bm{A}$; a scalar satisfies $s^\top = s$, hence $\bm{u}^\top \bm{v} = \bm{v}^\top \bm{u}$. Symmetric matrices satisfy $\bm{A}^\top = \bm{A}$; $\X^\top\X$ and projection matrices are always symmetric.
+
+\subsection{Positive (semi)definiteness}
+
+A symmetric $\bm{A}$ is \textbf{positive semidefinite} ($\bm{A} \succeq \zero$) if $\bm{v}^\top \bm{A} \bm{v} \geq 0$ for all $\bm{v}$; \textbf{positive definite} ($\bm{A} \succ \zero$) if strict for $\bm{v} \neq \zero$. Facts used:
+\begin{itemize}
+  \item Gram matrices are PSD: $(\X^\top\X) \succeq \zero$ since $\bm{v}^\top \X^\top \X \bm{v} = \norm{\X\bm{v}}^2 \geq 0$; and $\succ \zero$ iff $\X$ has trivial null space (full column rank).
+  \item PSD matrices have real nonnegative eigenvalues and orthonormal eigenvectors; PD matrices have positive eigenvalues and are invertible.
+  \item A sum of PSD matrices is PSD; adding $\lambda \bm{I}$ ($\lambda > 0$) makes any symmetric matrix PD — this is why ridge always has a unique solution.
+  \item $\bm{D}\bm{D}^\top \succeq \zero$ for any $\bm{D}$ — used in the Gauss--Markov proof.
+\end{itemize}
+
+\subsection{Inverse: existence and the Woodbury-free facts we need}
+
+$\bm{A}$ invertible $\iff$ null space trivial $\iff$ columns linearly independent. Inverse of a product: $(\bm{A}\bm{B})^{-1} = \bm{B}^{-1}\bm{A}^{-1}$. Invertibility is destroyed by \emph{dependent columns} (exact collinearity) and merely \emph{degraded} by nearly dependent ones (ill-conditioning, quantified by the condition number $\kappa(\X^\top\X) = \lambda_{\max}/\lambda_{\min}$).
+
+\subsection{Vector derivatives}
+
+For $\bm{c} \in \R^p$ and symmetric $\bm{A} \in \R^{p \times p}$:
+\[
+  \nabla_{\bbeta} (\bm{c}^\top \bbeta) = \bm{c},
+  \qquad
+  \nabla_{\bbeta} (\bbeta^\top \bm{A} \bbeta) = 2 \bm{A} \bbeta,
+  \qquad
+  \nabla^2_{\bbeta} (\bbeta^\top \bm{A} \bbeta) = 2 \bm{A}.
+\]
+Applied to $S(\bbeta) = \y^\top\y - 2\bbeta^\top\X^\top\y + \bbeta^\top\X^\top\X\bbeta$, these give gradient $-2\X^\top\y + 2\X^\top\X\bbeta$ and Hessian $2\X^\top\X$ (positive definite under full rank — hence strict convexity).
+
+\subsection{Eigen- and singular value decompositions}
+
+Every symmetric $\bm{A}$ has $\bm{A} = \bm{Q}\bm{\Lambda}\bm{Q}^\top$ with $\bm{Q}$ orthogonal ($\bm{Q}^\top\bm{Q} = \bm{I}$) and $\bm{\Lambda}$ diagonal of eigenvalues — the engine behind Lemma~\ref{lem:trace} and Theorem~\ref{thm:chi2}. Every matrix has an SVD $\X = \bm{U}\bm{D}\bm{V}^\top$ with $\bm{U}, \bm{V}$ orthogonal and $\bm{D} \geq 0$ diagonal (singular values $d_j$; $d_j^2$ = eigenvalues of $\X^\top\X$) — the engine behind ridge's shrinkage factors in Chapter~\ref{sec:bias-variance}.
+
+\subsection{Trace}
+
+$\trace(\bm{A}) = \sum_i A_{ii}$; $\trace(\bm{A}\bm{B}) = \trace(\bm{B}\bm{A})$ (cyclic, when dimensions match). Used for $\trace(\bm{H}) = \trace((\X^\top\X)^{-1}\X^\top\X) = \trace(\bm{I}_{p+1}) = p+1$.
+
+\subsection{Orthogonal projections}
+
+A matrix $\bm{P}$ is an orthogonal projection (onto its range, along the orthogonal complement) iff $\bm{P}^2 = \bm{P}$ (idempotent) and $\bm{P}^\top = \bm{P}$ (symmetric). Then $\norm{\bm{y}}^2 = \norm{\bm{P}\bm{y}}^2 + \norm{(\bm{I}-\bm{P})\bm{y}}^2$ (Pythagoras), and $\rank(\bm{P}) = \trace(\bm{P})$ (Lemma~\ref{lem:trace}). The hat matrix $\bm{H} = \X(\X^\top\X)^{-1}\X^\top$ is the canonical example; $\bm{I} - \bm{H}$ projects onto the residual space.
